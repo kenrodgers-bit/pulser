@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { useAuth } from "@/hooks/useAuth";
 import { resolveApiUrl } from "@/lib/api";
+import { isBackendConfigured, missingBackendMessage } from "@/lib/runtimeConfig";
 import { useUIStore } from "@/store/uiStore";
 
 const loginSchema = z.object({
@@ -57,6 +58,7 @@ export const AuthPage = () => {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [error, setError] = useState("");
   const googleAuthUrl = useMemo(() => resolveApiUrl("/api/auth/google"), []);
+  const authDisabled = !isBackendConfigured;
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -128,16 +130,29 @@ export const AuthPage = () => {
 
           <div className="mt-6">
             <button
-              className="flex h-12 w-full items-center justify-center gap-3 rounded-[12px] bg-white px-4 text-sm font-semibold text-[#161616] transition active:scale-[0.97]"
+              className="flex h-12 w-full items-center justify-center gap-3 rounded-[12px] bg-white px-4 text-sm font-semibold text-[#161616] transition active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
               onClick={() => {
+                if (!googleAuthUrl) {
+                  setError(missingBackendMessage);
+                  return;
+                }
+
                 window.location.href = googleAuthUrl;
               }}
+              disabled={authDisabled || !googleAuthUrl}
               type="button"
             >
               <GoogleIcon />
               Continue with Google
             </button>
           </div>
+
+          {authDisabled ? (
+            <div className="mt-4 rounded-[14px] border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning">
+              This Pulse deployment is online, but its backend is not connected yet.
+              Add `VITE_API_URL` and `VITE_SERVER_URL` to enable sign-in, stories, and chat.
+            </div>
+          ) : null}
 
           <div className="mt-5 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
@@ -152,6 +167,11 @@ export const AuthPage = () => {
               <form
                 className="space-y-4"
                 onSubmit={loginForm.handleSubmit(async (values) => {
+                  if (authDisabled) {
+                    setError(missingBackendMessage);
+                    return;
+                  }
+
                   try {
                     setError("");
                     await login(values.identifier, values.password);
@@ -165,6 +185,7 @@ export const AuthPage = () => {
                   <input
                     className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
                     placeholder="kenny"
+                    disabled={authDisabled}
                     {...loginForm.register("identifier")}
                   />
                   {loginForm.formState.errors.identifier ? (
@@ -179,6 +200,7 @@ export const AuthPage = () => {
                     type="password"
                     className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
                     placeholder="At least 8 characters"
+                    disabled={authDisabled}
                     {...loginForm.register("password")}
                   />
                   {loginForm.formState.errors.password ? (
@@ -188,7 +210,7 @@ export const AuthPage = () => {
                   ) : null}
                 </div>
                 {error ? <p className="text-sm text-danger">{error}</p> : null}
-                <Button className="w-full" type="submit">
+                <Button className="w-full" disabled={authDisabled} type="submit">
                   Enter Pulse
                 </Button>
               </form>
@@ -196,6 +218,11 @@ export const AuthPage = () => {
               <form
                 className="space-y-4"
                 onSubmit={registerForm.handleSubmit(async (values) => {
+                  if (authDisabled) {
+                    setError(missingBackendMessage);
+                    return;
+                  }
+
                   try {
                     setError("");
                     await register(values);
@@ -212,6 +239,7 @@ export const AuthPage = () => {
                   <input
                     className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
                     placeholder="kenny"
+                    disabled={authDisabled}
                     {...registerForm.register("username")}
                   />
                   {registerForm.formState.errors.username ? (
@@ -225,6 +253,7 @@ export const AuthPage = () => {
                   <input
                     className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
                     placeholder="Kenny"
+                    disabled={authDisabled}
                     {...registerForm.register("displayName")}
                   />
                   {registerForm.formState.errors.displayName ? (
@@ -239,6 +268,7 @@ export const AuthPage = () => {
                     type="email"
                     className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
                     placeholder="you@example.com"
+                    disabled={authDisabled}
                     {...registerForm.register("email")}
                   />
                   {registerForm.formState.errors.email ? (
@@ -253,6 +283,7 @@ export const AuthPage = () => {
                     type="password"
                     className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
                     placeholder="At least 8 characters"
+                    disabled={authDisabled}
                     {...registerForm.register("password")}
                   />
                   {registerForm.formState.errors.password ? (
@@ -262,7 +293,7 @@ export const AuthPage = () => {
                   ) : null}
                 </div>
                 {error ? <p className="text-sm text-danger">{error}</p> : null}
-                <Button className="w-full" type="submit">
+                <Button className="w-full" disabled={authDisabled} type="submit">
                   Create your space
                 </Button>
               </form>

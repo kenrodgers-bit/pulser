@@ -2,6 +2,7 @@ import { useEffect, useEffectEvent } from "react";
 
 import { api } from "@/lib/api";
 import { getSocket } from "@/lib/socket";
+import { isRealtimeConfigured } from "@/lib/runtimeConfig";
 import { useAuthStore } from "@/store/authStore";
 import { useChatStore } from "@/store/chatStore";
 import { useUIStore } from "@/store/uiStore";
@@ -156,11 +157,19 @@ export const useSocket = () => {
   useEffect(() => {
     if (!user) {
       const currentSocket = getSocket();
-      currentSocket.disconnect();
+      currentSocket?.disconnect();
+      return;
+    }
+
+    if (!isRealtimeConfigured) {
       return;
     }
 
     const socket = getSocket();
+    if (!socket) {
+      return;
+    }
+
     socket.connect();
 
     socket.on("new_message", handleNewMessage);

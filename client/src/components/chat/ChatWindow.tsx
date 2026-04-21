@@ -107,7 +107,7 @@ export const ChatWindow = ({
         window.clearTimeout(typingTimer.current);
       }
 
-      socket.emit("typing_stop", { chatId: roomId });
+      socket?.emit("typing_stop", { chatId: roomId });
       if (recorderRef.current?.state !== "inactive") {
         recorderRef.current.stop();
       }
@@ -208,9 +208,9 @@ export const ChatWindow = ({
 
   useEffect(() => {
     if (isChannel) {
-      socket.emit("join_channel", roomId);
+      socket?.emit("join_channel", roomId);
     } else {
-      socket.emit("join_chat", roomId);
+      socket?.emit("join_chat", roomId);
     }
   }, [isChannel, roomId, socket]);
 
@@ -228,14 +228,14 @@ export const ChatWindow = ({
       return;
     }
 
-    socket.emit("typing_start", { chatId: roomId });
+    socket?.emit("typing_start", { chatId: roomId });
 
     if (typingTimer.current) {
       window.clearTimeout(typingTimer.current);
     }
 
     typingTimer.current = window.setTimeout(() => {
-      socket.emit("typing_stop", { chatId: roomId });
+      socket?.emit("typing_stop", { chatId: roomId });
     }, 900);
   };
 
@@ -263,7 +263,7 @@ export const ChatWindow = ({
 
       setDraft("");
       handleSelectedFileChange(null);
-      socket.emit("typing_stop", { chatId: roomId });
+      socket?.emit("typing_stop", { chatId: roomId });
     } catch (error: any) {
       pushToast({
         title: "Send failed",

@@ -1,27 +1,36 @@
 import axios from "axios";
 
-const LOCAL_URL_PATTERN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/.*)?$/i;
-const configuredApiUrl = import.meta.env.VITE_API_URL;
-const shouldUseDevProxy =
-  import.meta.env.DEV &&
-  (!configuredApiUrl || LOCAL_URL_PATTERN.test(configuredApiUrl));
+import {
+  apiBaseUrl,
+  apiOrigin,
+  isBackendConfigured,
+  missingBackendMessage,
+} from "@/lib/runtimeConfig";
 
-const API_URL = shouldUseDevProxy
-  ? "/api"
-  : configuredApiUrl || "http://localhost:4000/api";
-const API_ORIGIN = shouldUseDevProxy
-  ? window.location.origin
-  : (configuredApiUrl || "http://localhost:4000/api").replace(/\/api$/, "");
+const createBackendConfigError = () =>
+  Object.assign(new Error(missingBackendMessage), {
+    code: "PULSE_BACKEND_NOT_CONFIGURED",
+  });
 
 export const api = axios.create({
-  baseURL: API_URL,
+  baseURL: apiBaseUrl ?? "/api",
   withCredentials: true,
 });
 
 export const resolveApiUrl = (path = "") =>
-  new URL(path.startsWith("/") ? path : `/${path}`, `${API_ORIGIN}/`).toString();
+  apiOrigin
+    ? new URL(path.startsWith("/") ? path : `/${path}`, `${apiOrigin}/`).toString()
+    : null;
 
 let refreshPromise: Promise<void> | null = null;
+
+api.interceptors.request.use((config) => {
+  if (!isBackendConfigured) {
+    return Promise.reject(createBackendConfigError());
+  }
+
+  return config;
+});
 
 api.interceptors.response.use(
   (response) => response,
