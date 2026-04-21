@@ -29,10 +29,10 @@ Pulse is a full-stack Progressive Web App messaging platform that blends Instagr
 
 ```text
 /
-├─ client/   # React + Vite PWA
-├─ server/   # Express + Socket.IO API
-├─ package.json
-└─ README.md
+|-- client/   # React + Vite PWA
+|-- server/   # Express + Socket.IO API
+|-- package.json
+`-- README.md
 ```
 
 ## Local Setup
@@ -166,9 +166,9 @@ Push notifications require HTTPS in production.
 
 From the repo root:
 
-- `npm run dev` — run client and server together
-- `npm run build` — build both workspaces
-- `npm run preview` — preview the Vite production build
+- `npm run dev` - run client and server together
+- `npm run build` - build both workspaces
+- `npm run preview` - preview the Vite production build
 
 From inside each workspace:
 
@@ -224,8 +224,9 @@ API routes are documented inline inside `server/src/routes/*.ts`. Each route fil
 
 The current repo passes:
 
-- `server`: `npm run build`
-- `client`: `npm run build`
+- `npm run lint`
+- `npm test`
+- `npm run build`
 
 ## Deployment Considerations
 
