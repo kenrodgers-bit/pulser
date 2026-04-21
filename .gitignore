@@ -8,3 +8,5 @@ client/dist/
 server/dist/
 coverage/
 *.log
+
+.vercel

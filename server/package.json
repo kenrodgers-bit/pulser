@@ -4,10 +4,10 @@
   "description": "Pulse Express and Socket.IO backend",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "node ..\\node_modules\\tsx\\dist\\cli.mjs watch src/server.ts",
-    "build": "node ..\\node_modules\\typescript\\bin\\tsc --project tsconfig.json",
-    "lint": "node ..\\node_modules\\eslint\\bin\\eslint.js \"src/**/*.ts\" vitest.config.ts",
-    "test": "node ..\\node_modules\\vitest\\vitest.mjs run --config vitest.config.ts",
+    "dev": "node ../scripts/run-node-bin.cjs tsx tsx watch src/server.ts",
+    "build": "node ../scripts/run-node-bin.cjs typescript tsc --project tsconfig.json",
+    "lint": "node ../scripts/run-node-bin.cjs eslint eslint \"src/**/*.ts\" vitest.config.ts",
+    "test": "node ../scripts/run-node-bin.cjs vitest vitest run --config vitest.config.ts",
     "start": "node dist/server.js"
   },
   "license": "MIT",

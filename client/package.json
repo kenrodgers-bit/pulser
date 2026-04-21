@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node ..\\node_modules\\vite\\bin\\vite.js",
-    "build": "node ..\\node_modules\\typescript\\bin\\tsc -b && node ..\\node_modules\\vite\\bin\\vite.js build",
-    "lint": "node ..\\node_modules\\eslint\\bin\\eslint.js \"src/**/*.{ts,tsx}\" vite.config.ts vitest.config.ts",
-    "test": "node ..\\node_modules\\vitest\\vitest.mjs run --config vitest.config.ts",
-    "preview": "node ..\\node_modules\\vite\\bin\\vite.js preview"
+    "dev": "node ../scripts/run-node-bin.cjs vite vite",
+    "build": "node ../scripts/run-node-bin.cjs typescript tsc -b && node ../scripts/run-node-bin.cjs vite vite build",
+    "lint": "node ../scripts/run-node-bin.cjs eslint eslint \"src/**/*.{ts,tsx}\" vite.config.ts vitest.config.ts",
+    "test": "node ../scripts/run-node-bin.cjs vitest vitest run --config vitest.config.ts",
+    "preview": "node ../scripts/run-node-bin.cjs vite vite preview"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
