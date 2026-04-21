@@ -1,0 +1,37 @@
+{
+  "name": "pulse",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pulse full-stack PWA messaging application",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "node .\\node_modules\\concurrently\\dist\\bin\\concurrently.js -n client,server -c cyan,magenta \"npm run dev --workspace client\" \"npm run dev --workspace server\"",
+    "build": "npm run build --workspace client && npm run build --workspace server",
+    "lint": "npm run lint --workspace client && npm run lint --workspace server",
+    "test": "npm run test --workspace client && npm run test --workspace server",
+    "preview": "npm run preview --workspace client"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kenrodgers-bit/pulser.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/supertest": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "concurrently": "^9.2.1",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^17.4.0",
+    "jsdom": "^24.1.3",
+    "supertest": "^7.1.1",
+    "vitest": "^2.1.9"
+  }
+}
