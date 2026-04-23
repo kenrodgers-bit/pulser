@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { motion } from "framer-motion";
-import { FileImage, FileVideo, Paperclip, X } from "lucide-react";
+import { Camera, FileImage, FileVideo, Paperclip, X } from "lucide-react";
 
 import type { ViewMode } from "@/types";
 import { ViewModeToggle } from "./ViewModeToggle";
@@ -65,21 +65,39 @@ export const MediaPicker = ({
           ? "audio/*,.pdf,.zip,.doc,.docx"
           : "image/*,video/*,audio/*,.pdf,.zip,.doc,.docx";
 
+  const placeholderTiles = Array.from({ length: 9 }, (_, index) => ({
+    id: `${activeTab}-${index}`,
+    icon:
+      activeTab === "Videos" ? (
+        <FileVideo className="h-5 w-5" />
+      ) : activeTab === "Files" ? (
+        <Paperclip className="h-5 w-5" />
+      ) : activeTab === "Camera" ? (
+        <Camera className="h-5 w-5" />
+      ) : (
+        <FileImage className="h-5 w-5" />
+      ),
+  }));
+
   return (
-    <div className="space-y-3 rounded-[14px] border border-border bg-white/5 p-3">
-      <div className="grid grid-cols-5 gap-2">
+    <div className="space-y-4">
+      <div
+        className="ig-segmented"
+        style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}
+      >
         {pickerTabs.map((tab) => (
           <button
             key={tab}
-            className="relative overflow-hidden rounded-[10px] px-2 py-2 text-center text-xs font-medium text-[var(--muted)]"
+            className="ig-segmented__option"
             onClick={() => setActiveTab(tab)}
             type="button"
           >
             {activeTab === tab ? (
               <motion.span
-                className="absolute inset-0 rounded-[10px] bg-accent/16"
+                className="ig-segmented__indicator"
                 layoutId="pulse-picker-tab"
                 transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                style={{ width: "calc(20% - 4px)" }}
               />
             ) : null}
             <span className={`relative z-10 ${activeTab === tab ? "text-white" : ""}`}>
@@ -89,51 +107,83 @@ export const MediaPicker = ({
         ))}
       </div>
 
-      {previewUrl ? (
-        <img
-          src={previewUrl}
-          alt={file?.name ?? "Preview"}
-          className="h-40 w-full rounded-[10px] object-cover"
-        />
-      ) : null}
-
-      <div className="flex items-center justify-between gap-3">
-        <label className="flex cursor-pointer items-center gap-3 rounded-[12px] border border-dashed border-border px-3 py-3 text-sm text-[var(--muted)] transition hover:border-accent/40 hover:bg-white/6">
-          {file?.type.startsWith("image/") ? (
-            <FileImage className="h-4 w-4 text-accent" />
-          ) : file?.type.startsWith("video/") ? (
-            <FileVideo className="h-4 w-4 text-accent" />
-          ) : (
-            <Paperclip className="h-4 w-4 text-accent" />
-          )}
-          <span className="truncate">
-            {file ? file.name : "Attach photo, video, audio, or file"}
-          </span>
-          <input
-            className="hidden"
-            type="file"
-            accept={accept}
-            capture={activeTab === "Camera" ? "environment" : undefined}
-            onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
-          />
-        </label>
-        {file ? (
+      <div className="grid grid-cols-3 gap-0.5 overflow-hidden rounded-[18px] border border-[var(--border)] bg-[var(--bg-elevated)]">
+        {placeholderTiles.map((tile) => (
           <button
-            className="rounded-full bg-white/6 p-2 text-[var(--muted)] transition hover:bg-white/10 hover:text-[var(--ink)]"
-            onClick={() => onFileChange(null)}
+            key={tile.id}
+            className="flex aspect-square items-center justify-center border-[0.5px] border-[var(--border-soft)] bg-[var(--bg-surface)] text-[var(--text-muted)] transition hover:text-[var(--text-primary)]"
             type="button"
           >
-            <X className="h-4 w-4" />
+            {tile.icon}
           </button>
-        ) : null}
+        ))}
       </div>
 
-      {file?.type.startsWith("image/") || file?.type.startsWith("video/") ? (
-        <ViewModeToggle value={viewMode} onChange={onViewModeChange} />
-      ) : null}
+      <div className="ig-soft-card p-4">
+        <div className="flex items-center justify-between gap-3">
+          <label className="flex flex-1 cursor-pointer items-center gap-3 rounded-[14px] border border-dashed border-[var(--border)] px-4 py-4 text-sm text-[var(--text-secondary)] transition hover:border-[var(--unread)]">
+            {file?.type.startsWith("image/") ? (
+              <FileImage className="h-4 w-4 text-[var(--unread)]" />
+            ) : file?.type.startsWith("video/") ? (
+              <FileVideo className="h-4 w-4 text-[var(--unread)]" />
+            ) : activeTab === "Camera" ? (
+              <Camera className="h-4 w-4 text-[var(--unread)]" />
+            ) : (
+              <Paperclip className="h-4 w-4 text-[var(--unread)]" />
+            )}
+            <span className="truncate">
+              {file ? file.name : "Choose photo, video, audio, or file"}
+            </span>
+            <input
+              className="hidden"
+              type="file"
+              accept={accept}
+              capture={activeTab === "Camera" ? "environment" : undefined}
+              onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
+            />
+          </label>
+          {file ? (
+            <button className="ig-icon-button" onClick={() => onFileChange(null)} type="button">
+              <X className="h-4 w-4" />
+            </button>
+          ) : null}
+        </div>
 
-      <div className="rounded-[12px] border border-border bg-white/4 px-4 py-3 text-sm text-[var(--muted)]">
-        Caption text comes from the composer. Send when you are ready.
+        {previewUrl ? (
+          <img
+            src={previewUrl}
+            alt={file?.name ?? "Preview"}
+            className="mt-4 h-40 w-full rounded-[14px] object-cover"
+          />
+        ) : null}
+
+        {file?.type.startsWith("image/") || file?.type.startsWith("video/") ? (
+          <div className="mt-4">
+            <ViewModeToggle value={viewMode} onChange={onViewModeChange} />
+          </div>
+        ) : null}
+
+        <div className="mt-4 flex items-center gap-3 rounded-[14px] border border-[var(--border)] bg-[var(--bg-surface)] p-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-[var(--bg-elevated)] text-[var(--text-secondary)]">
+            {previewUrl ? (
+              <img
+                src={previewUrl}
+                alt={file?.name ?? "Selected file"}
+                className="h-full w-full rounded-[12px] object-cover"
+              />
+            ) : (
+              <Paperclip className="h-4 w-4" />
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-[var(--text-primary)]">
+              {file?.name ?? "No media selected"}
+            </p>
+            <p className="text-xs text-[var(--text-muted)]">
+              Caption comes from the message composer below.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

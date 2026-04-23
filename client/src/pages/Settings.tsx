@@ -66,50 +66,52 @@ export const SettingsPage = () => {
 
   return (
     <PageTransition className="space-y-4">
-      <section className="glass-panel rounded-[20px] p-5">
-        <p className="text-xs uppercase tracking-[0.24em] text-accent-2">
-          Appearance
-        </p>
-        <h2 className="mt-2 font-heading text-3xl font-semibold tracking-[-0.03em]">
-          Look and feel
-        </h2>
-        <div className="mt-5 grid gap-2 rounded-[14px] border border-border bg-white/4 p-1 md:grid-cols-3">
-          {appearanceOptions.map((option) => (
+      <section className="ig-panel">
+        <p className="ig-section-label">Appearance</p>
+        <h2 className="ig-section-title mt-3">Look and feel</h2>
+        <div
+          className="ig-segmented mt-5"
+          style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}
+        >
+          {appearanceOptions.map((option, index) => (
             <button
               key={option.id}
-              className="relative overflow-hidden rounded-[12px] px-4 py-4 text-left transition"
+              className={`ig-segmented__option ${
+                theme === option.id ? "ig-segmented__option--active" : ""
+              }`}
               onClick={() => setTheme(option.id)}
               type="button"
             >
               {theme === option.id ? (
                 <motion.span
-                  className="absolute inset-0 rounded-[12px] border border-accent/35 bg-accent/14"
+                  className="ig-segmented__indicator"
                   layoutId="pulse-appearance-tab"
+                  style={{ width: "calc(33.333% - 4px)", transform: `translateX(${index * 100}%)` }}
                   transition={{ type: "spring", stiffness: 380, damping: 32 }}
                 />
               ) : null}
-              <p className="relative z-10 font-semibold capitalize">{option.id}</p>
-              <p className="relative z-10 mt-1 text-sm text-[var(--muted)]">
-                {option.description}
-              </p>
+              <span className="relative z-10 capitalize">{option.id}</span>
             </button>
           ))}
         </div>
-        <div className="mt-4 rounded-[14px] border border-border bg-white/4 p-4">
+        <div className="mt-4 ig-soft-card p-4">
           <p className="text-sm font-semibold">Live preview</p>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
-            <div className="rounded-[14px] bg-[var(--pulse-bg)] p-3">
-              <div className="rounded-[10px] bg-[var(--pulse-surface)] px-3 py-3 text-sm text-[var(--pulse-text)]">
+            <div className="rounded-[14px] bg-[var(--bg-base)] p-3">
+              <div className="rounded-[12px] bg-[var(--bg-surface)] px-3 py-3 text-sm">
                 Chat bubble
               </div>
             </div>
-            <div className="rounded-[14px] bg-[var(--pulse-bg)] p-3">
-              <div className="rounded-[10px] bg-[var(--pulse-surface2)] px-3 py-3 text-sm text-[var(--pulse-text)]">
+            <div className="rounded-[14px] bg-[var(--bg-base)] p-3">
+              <div className="rounded-[12px] bg-[var(--bg-elevated)] px-3 py-3 text-sm">
                 Elevated card
               </div>
             </div>
-            <div className="rounded-[14px] bg-[var(--pulse-bg)] p-3">
-              <div className="rounded-[10px] bg-[var(--pulse-accent)] px-3 py-3 text-sm text-white shadow-glow">
+            <div className="rounded-[14px] bg-[var(--bg-base)] p-3">
+              <div
+                className="rounded-[12px] px-3 py-3 text-sm text-[var(--white)] shadow-glow"
+                style={{ background: "var(--grad-brand-2)" }}
+              >
                 Accent action
               </div>
             </div>
@@ -117,15 +119,15 @@ export const SettingsPage = () => {
         </div>
       </section>
 
-      <section className="glass-panel rounded-[20px] p-5">
-        <h3 className="font-semibold">Profile and privacy</h3>
+      <section className="ig-panel">
+        <h3 className="text-sm font-semibold">Profile and privacy</h3>
         <div className="mt-5 grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <div className="rounded-[16px] border border-border bg-white/4 p-4">
+          <div className="ig-soft-card p-4">
             <div className="flex flex-col items-center text-center">
               <Avatar src={avatarPreview} alt={user.displayName} size="xl" />
-              <p className="mt-4 font-semibold">{form.displayName || user.displayName}</p>
-              <p className="text-sm text-[var(--muted)]">@{form.username || user.username}</p>
-              <label className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-full bg-white/8 px-4 py-2 text-sm font-semibold text-[var(--ink)] transition hover:bg-white/12">
+              <p className="mt-4 text-sm font-semibold">{form.displayName || user.displayName}</p>
+              <p className="text-sm text-[var(--text-secondary)]">@{form.username || user.username}</p>
+              <label className="mt-5 ig-pill cursor-pointer">
                 <Camera className="h-4 w-4" />
                 Change avatar
                 <input
@@ -140,7 +142,7 @@ export const SettingsPage = () => {
 
           <div className="space-y-4">
             <input
-              className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+              className="ig-field"
               placeholder="Display name"
               value={form.displayName}
               onChange={(event) =>
@@ -151,7 +153,7 @@ export const SettingsPage = () => {
               }
             />
             <input
-              className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+              className="ig-field"
               placeholder="Username"
               value={form.username}
               onChange={(event) =>
@@ -162,7 +164,7 @@ export const SettingsPage = () => {
               }
             />
             <textarea
-              className="min-h-28 w-full rounded-[12px] border border-border bg-white/5 px-4 py-3 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+              className="ig-textarea"
               placeholder="Bio"
               value={form.bio}
               onChange={(event) =>
@@ -178,13 +180,10 @@ export const SettingsPage = () => {
                 ["avatar", "Who can see my avatar"],
                 ["stories", "Who can see my stories"],
               ] as const).map(([key, label]) => (
-                <label
-                  key={key}
-                  className="block rounded-[14px] border border-border bg-white/4 px-4 py-4"
-                >
+                <label key={key} className="ig-soft-card block px-4 py-4">
                   <span className="text-sm font-medium">{label}</span>
                   <select
-                    className="mt-3 h-11 w-full rounded-[12px] border border-border bg-white/5 px-3 outline-none focus:border-accent/40"
+                    className="ig-select mt-3"
                     value={form[key]}
                     onChange={(event) =>
                       setForm((current) => ({
@@ -244,10 +243,10 @@ export const SettingsPage = () => {
         </div>
       </section>
 
-      <section className="glass-panel rounded-[20px] p-5">
+      <section className="ig-panel">
         <div className="flex items-center gap-2">
-          <Bell className="h-4 w-4 text-accent" />
-          <h3 className="font-semibold">Notification preferences</h3>
+          <Bell className="h-4 w-4 text-[var(--unread)]" />
+          <h3 className="text-sm font-semibold">Notification preferences</h3>
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           {([
@@ -264,11 +263,7 @@ export const SettingsPage = () => {
           ] as const).map(([key, label, description]) => (
             <button
               key={key}
-              className={`rounded-[14px] border px-4 py-4 text-left transition ${
-                form[key]
-                  ? "border-accent/30 bg-accent/10"
-                  : "border-border bg-white/4 hover:bg-white/8"
-              }`}
+              className="ig-list-row text-left"
               onClick={() =>
                 setForm((current) => ({
                   ...current,
@@ -277,24 +272,27 @@ export const SettingsPage = () => {
               }
               type="button"
             >
-              <p className="font-semibold">{label}</p>
-              <p className="mt-1 text-sm text-[var(--muted)]">{description}</p>
+              <div>
+                <p className="text-sm font-semibold">{label}</p>
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">{description}</p>
+              </div>
+              <span className={form[key] ? "ig-badge" : "ig-pill"}>{form[key] ? "On" : "Off"}</span>
             </button>
           ))}
         </div>
-        <p className="mt-4 text-sm text-[var(--muted)]">
-          Browser push subscription is enabled from your profile page; these settings control
-          how Pulse should behave after the device is registered.
+        <p className="mt-4 text-sm text-[var(--text-secondary)]">
+          Browser push subscription is enabled from your profile page; these settings
+          control how Pulse behaves after the device is registered.
         </p>
       </section>
 
-      <section className="glass-panel rounded-[20px] p-5">
-        <h3 className="font-semibold">Account security</h3>
+      <section className="ig-panel">
+        <h3 className="text-sm font-semibold">Account security</h3>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <input
-            type="password"
-            className="h-12 rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+            className="ig-field"
             placeholder="Current password"
+            type="password"
             value={passwordForm.currentPassword}
             onChange={(event) =>
               setPasswordForm((current) => ({
@@ -304,9 +302,9 @@ export const SettingsPage = () => {
             }
           />
           <input
-            type="password"
-            className="h-12 rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+            className="ig-field"
             placeholder="New password"
+            type="password"
             value={passwordForm.newPassword}
             onChange={(event) =>
               setPasswordForm((current) => ({
@@ -319,24 +317,20 @@ export const SettingsPage = () => {
         <Button
           className="mt-5"
           onClick={async () => {
-            await changePassword(
-              passwordForm.currentPassword,
-              passwordForm.newPassword,
-            );
+            await changePassword(passwordForm.currentPassword, passwordForm.newPassword);
           }}
         >
           Change password
         </Button>
       </section>
 
-      <section className="glass-panel rounded-[20px] border border-danger/20 p-5">
-        <h3 className="font-semibold text-danger">Danger zone</h3>
-        <p className="mt-2 text-sm text-[var(--muted)]">
+      <section className="ig-panel border-[rgba(231,76,60,0.24)]">
+        <h3 className="text-sm font-semibold text-[var(--danger)]">Danger zone</h3>
+        <p className="mt-2 text-sm text-[var(--text-secondary)]">
           Deleting your account removes your profile and signs you out on this device.
         </p>
         <Button
           className="mt-5"
-          variant="danger"
           iconLeft={<Trash2 className="h-4 w-4" />}
           onClick={async () => {
             if (
@@ -355,6 +349,7 @@ export const SettingsPage = () => {
             });
             navigate("/auth");
           }}
+          variant="danger"
         >
           Delete account
         </Button>

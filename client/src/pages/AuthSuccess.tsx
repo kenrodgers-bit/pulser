@@ -30,12 +30,11 @@ export const AuthSuccessPage = () => {
   }, [fetchCurrentUser, navigate, pushToast]);
 
   return (
-    <PageTransition className="flex min-h-screen items-center justify-center px-4">
-      <div className="glass-elevated rounded-[22px] border border-border px-8 py-10 text-center shadow-modal">
-        <p className="font-heading text-2xl font-semibold tracking-[-0.04em] text-accent">
-          Signing you in...
-        </p>
-        <p className="mt-3 text-sm text-[var(--muted)]">
+    <PageTransition className="ig-auth-shell">
+      <div className="ig-auth-card text-center">
+        <div className="ig-logo-square ig-logo-square--large mx-auto">P</div>
+        <p className="ig-wordmark mt-5 text-[28px] text-[var(--white)]">Signing you in...</p>
+        <p className="mt-3 text-sm text-[var(--text-secondary)]">
           Pulse is syncing your account and preparing your inbox.
         </p>
       </div>

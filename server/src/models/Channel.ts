@@ -80,7 +80,6 @@ const ChannelSchema = new Schema(
   },
 );
 
-ChannelSchema.index({ slug: 1 });
 ChannelSchema.index({ visibility: 1, updatedAt: -1 });
 
 export type IChannel = InferSchemaType<typeof ChannelSchema> & {

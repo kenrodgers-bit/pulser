@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 
 import { cn } from "@/utils/cn";
 
@@ -11,10 +12,10 @@ type AvatarProps = {
 };
 
 const sizes = {
-  sm: "h-9 w-9 text-xs",
-  md: "h-11 w-11 text-sm",
-  lg: "h-14 w-14 text-base",
-  xl: "h-20 w-20 text-xl",
+  sm: 36,
+  md: 46,
+  lg: 52,
+  xl: 72,
 };
 
 export const Avatar = ({
@@ -24,31 +25,65 @@ export const Avatar = ({
   online = false,
   ring = false,
 }: AvatarProps) => {
+  const { ref, inView } = useInView({
+    fallbackInView: true,
+    rootMargin: "160px",
+    triggerOnce: true,
+  });
   const initials = alt
     .split(" ")
     .map((chunk) => chunk[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
+  const avatarSize = sizes[size];
 
   return (
     <motion.div className="relative shrink-0" layout>
       <div
+        ref={ref}
         className={cn(
-          "grid place-items-center overflow-hidden rounded-full border border-white/10 bg-white/6 font-semibold text-[var(--ink)]",
-          sizes[size],
-          ring && "pulse-story-ring",
+          "grid place-items-center overflow-hidden rounded-full font-semibold",
+          ring && "story-unseen",
         )}
-        data-unseen={ring}
+        style={{
+          width: avatarSize,
+          height: avatarSize,
+          padding: ring ? 2.5 : 0,
+          background: ring ? "var(--grad-brand-3)" : "var(--bg-elevated)",
+          border: ring ? "0" : "0.5px solid var(--border)",
+          color: "var(--text-primary)",
+        }}
       >
-        {src ? (
-          <img src={src} alt={alt} className="h-full w-full object-cover" />
-        ) : (
-          initials
-        )}
+        <div
+          className="grid h-full w-full place-items-center overflow-hidden rounded-full"
+          style={{
+            border: ring ? "2px solid var(--bg-base)" : "0",
+            background: src ? "var(--bg-elevated)" : "var(--grad-brand-2)",
+          }}
+        >
+          {src && inView ? (
+            <img
+              src={src}
+              alt={alt}
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span>{initials}</span>
+          )}
+        </div>
       </div>
       {online ? (
-        <span className="online-dot absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-[var(--bg)] bg-success" />
+        <span
+          className="online-dot absolute bottom-0 right-0 rounded-full border-2"
+          style={{
+            width: 12,
+            height: 12,
+            borderColor: "var(--bg-base)",
+          }}
+        />
       ) : null}
     </motion.div>
   );

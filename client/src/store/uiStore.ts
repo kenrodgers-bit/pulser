@@ -31,7 +31,7 @@ type UIState = {
 };
 
 export const useUIStore = create<UIState>((set) => ({
-  theme: "system",
+  theme: "dark",
   installPromptEvent: null,
   toasts: [],
   mediaViewer: {

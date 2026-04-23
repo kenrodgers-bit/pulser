@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -26,6 +27,7 @@ const registerSchema = z.object({
 
 const errorMessages: Record<string, string> = {
   google_failed: "Google sign-in failed. Try again.",
+  google_unavailable: "Google sign-in is not configured yet. Use email instead.",
   server_error: "Something went wrong. Please try again.",
   fetch_failed: "Couldn't load your account. Try logging in.",
 };
@@ -57,7 +59,11 @@ export const AuthPage = () => {
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [error, setError] = useState("");
-  const googleAuthUrl = useMemo(() => resolveApiUrl("/api/auth/google"), []);
+  const googleAuthEnabled = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim());
+  const googleAuthUrl = useMemo(
+    () => (googleAuthEnabled ? resolveApiUrl("/api/auth/google") : null),
+    [googleAuthEnabled],
+  );
   const authDisabled = !isBackendConfigured;
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -94,226 +100,220 @@ export const AuthPage = () => {
   }
 
   return (
-    <PageTransition className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-8">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(124,92,252,0.18),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(165,140,245,0.12),transparent_22%)]" />
-      <div className="relative w-full max-w-[420px]">
-        <div className="glass-elevated rounded-[24px] border border-border p-6 shadow-modal md:p-8">
-          <div className="text-center">
-            <p className="font-heading text-3xl font-semibold tracking-[-0.04em]">Pulse</p>
-            <p className="mt-2 text-sm text-[var(--muted)]">Message freely.</p>
-          </div>
+    <PageTransition className="ig-auth-shell">
+      <div className="ig-auth-card">
+        <div className="text-center">
+          <div className="ig-logo-square ig-logo-square--large mx-auto">P</div>
+          <p className="ig-wordmark mt-5 text-[32px] text-[var(--white)]">Pulse</p>
+          <p className="mt-2 text-[13px] text-[var(--text-muted)]">Message freely.</p>
+        </div>
 
-          <div className="mt-8 rounded-[14px] border border-border bg-white/6 p-1">
-            <div className="grid grid-cols-2 gap-2">
-              {([
-                ["login", "Log in"],
-                ["register", "Sign up"],
-              ] as const).map(([value, label]) => (
-                <button
-                  key={value}
-                  className={`h-11 rounded-[12px] text-sm font-semibold transition ${
-                    mode === value
-                      ? "bg-accent text-white shadow-glow"
-                      : "text-[var(--muted)] hover:bg-white/6"
-                  }`}
-                  onClick={() => {
-                    setMode(value);
-                    setError("");
-                  }}
-                  type="button"
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-6">
+        <div
+          className="ig-segmented mt-8"
+          style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}
+        >
+          {([
+            ["login", "Log in"],
+            ["register", "Sign up"],
+          ] as const).map(([value, label], index) => (
             <button
-              className="flex h-12 w-full items-center justify-center gap-3 rounded-[12px] bg-white px-4 text-sm font-semibold text-[#161616] transition active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+              key={value}
+              className={`ig-segmented__option ${
+                mode === value ? "ig-segmented__option--active" : ""
+              }`}
               onClick={() => {
-                if (!googleAuthUrl) {
-                  setError(missingBackendMessage);
-                  return;
-                }
-
-                window.location.href = googleAuthUrl;
-              }}
-              disabled={authDisabled || !googleAuthUrl}
-              type="button"
-            >
-              <GoogleIcon />
-              Continue with Google
-            </button>
-          </div>
-
-          {authDisabled ? (
-            <div className="mt-4 rounded-[14px] border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning">
-              This Pulse deployment is online, but its backend is not connected yet.
-              Add `VITE_API_URL` and `VITE_SERVER_URL` to enable sign-in, stories, and chat.
-            </div>
-          ) : null}
-
-          <div className="mt-5 flex items-center gap-3">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-xs uppercase tracking-[0.24em] text-[var(--muted)]">
-              or continue with email
-            </span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
-
-          <div className="mt-5 space-y-4">
-            {mode === "login" ? (
-              <form
-                className="space-y-4"
-                onSubmit={loginForm.handleSubmit(async (values) => {
-                  if (authDisabled) {
-                    setError(missingBackendMessage);
-                    return;
-                  }
-
-                  try {
-                    setError("");
-                    await login(values.identifier, values.password);
-                  } catch (caughtError: any) {
-                    setError(caughtError?.response?.data?.message ?? "Unable to sign in.");
-                  }
-                })}
-              >
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Email or username</label>
-                  <input
-                    className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
-                    placeholder="kenny"
-                    disabled={authDisabled}
-                    {...loginForm.register("identifier")}
-                  />
-                  {loginForm.formState.errors.identifier ? (
-                    <p className="text-xs text-danger">
-                      {loginForm.formState.errors.identifier.message}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Password</label>
-                  <input
-                    type="password"
-                    className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
-                    placeholder="At least 8 characters"
-                    disabled={authDisabled}
-                    {...loginForm.register("password")}
-                  />
-                  {loginForm.formState.errors.password ? (
-                    <p className="text-xs text-danger">
-                      {loginForm.formState.errors.password.message}
-                    </p>
-                  ) : null}
-                </div>
-                {error ? <p className="text-sm text-danger">{error}</p> : null}
-                <Button className="w-full" disabled={authDisabled} type="submit">
-                  Enter Pulse
-                </Button>
-              </form>
-            ) : (
-              <form
-                className="space-y-4"
-                onSubmit={registerForm.handleSubmit(async (values) => {
-                  if (authDisabled) {
-                    setError(missingBackendMessage);
-                    return;
-                  }
-
-                  try {
-                    setError("");
-                    await register(values);
-                  } catch (caughtError: any) {
-                    setError(
-                      caughtError?.response?.data?.message ??
-                        "Unable to create your account.",
-                    );
-                  }
-                })}
-              >
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Username</label>
-                  <input
-                    className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
-                    placeholder="kenny"
-                    disabled={authDisabled}
-                    {...registerForm.register("username")}
-                  />
-                  {registerForm.formState.errors.username ? (
-                    <p className="text-xs text-danger">
-                      {registerForm.formState.errors.username.message}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Display name</label>
-                  <input
-                    className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
-                    placeholder="Kenny"
-                    disabled={authDisabled}
-                    {...registerForm.register("displayName")}
-                  />
-                  {registerForm.formState.errors.displayName ? (
-                    <p className="text-xs text-danger">
-                      {registerForm.formState.errors.displayName.message}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Email</label>
-                  <input
-                    type="email"
-                    className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
-                    placeholder="you@example.com"
-                    disabled={authDisabled}
-                    {...registerForm.register("email")}
-                  />
-                  {registerForm.formState.errors.email ? (
-                    <p className="text-xs text-danger">
-                      {registerForm.formState.errors.email.message}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Password</label>
-                  <input
-                    type="password"
-                    className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
-                    placeholder="At least 8 characters"
-                    disabled={authDisabled}
-                    {...registerForm.register("password")}
-                  />
-                  {registerForm.formState.errors.password ? (
-                    <p className="text-xs text-danger">
-                      {registerForm.formState.errors.password.message}
-                    </p>
-                  ) : null}
-                </div>
-                {error ? <p className="text-sm text-danger">{error}</p> : null}
-                <Button className="w-full" disabled={authDisabled} type="submit">
-                  Create your space
-                </Button>
-              </form>
-            )}
-          </div>
-
-          <p className="mt-6 text-center text-sm text-[var(--muted)]">
-            {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
-            <button
-              className="font-semibold text-accent-2 transition hover:text-white"
-              onClick={() => {
-                setMode(mode === "login" ? "register" : "login");
+                setMode(value);
                 setError("");
               }}
               type="button"
             >
-              {mode === "login" ? "Sign up" : "Log in"}
+              {mode === value ? (
+                <motion.span
+                  className="ig-segmented__indicator"
+                  layoutId="auth-mode-toggle"
+                  style={{ width: "calc(50% - 4px)", transform: `translateX(${index * 100}%)` }}
+                />
+              ) : null}
+              <span className="relative z-10">{label}</span>
             </button>
-          </p>
+          ))}
         </div>
+
+        {googleAuthEnabled ? (
+          <button
+            className="mt-6 flex h-11 w-full items-center justify-center gap-3 rounded-[12px] border border-white bg-white px-4 text-sm font-semibold text-black transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={authDisabled || !googleAuthUrl}
+            onClick={() => {
+              if (!googleAuthUrl) {
+                setError(missingBackendMessage);
+                return;
+              }
+
+              window.location.href = googleAuthUrl;
+            }}
+            type="button"
+          >
+            <GoogleIcon />
+            Continue with Google
+          </button>
+        ) : null}
+
+        {authDisabled ? (
+          <div className="ig-soft-card mt-4 border-[rgba(231,76,60,0.24)] p-4 text-sm text-[var(--danger)]">
+            This Pulse deployment is online, but its backend is not connected yet.
+          </div>
+        ) : null}
+
+        <div className="ig-auth-divider mt-5">
+          {googleAuthEnabled ? "or" : "email"}
+        </div>
+
+        <div className="mt-5 space-y-4">
+          {mode === "login" ? (
+            <form
+              className="space-y-4"
+              onSubmit={loginForm.handleSubmit(async (values) => {
+                if (authDisabled) {
+                  setError(missingBackendMessage);
+                  return;
+                }
+
+                try {
+                  setError("");
+                  await login(values.identifier, values.password);
+                } catch (caughtError: any) {
+                  setError(caughtError?.response?.data?.message ?? "Unable to sign in.");
+                }
+              })}
+            >
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Email or username</label>
+                <input
+                  className="ig-field"
+                  disabled={authDisabled}
+                  placeholder="kenny"
+                  {...loginForm.register("identifier")}
+                />
+                {loginForm.formState.errors.identifier ? (
+                  <p className="text-[11px] text-[var(--danger)]">
+                    {loginForm.formState.errors.identifier.message}
+                  </p>
+                ) : null}
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Password</label>
+                <input
+                  className="ig-field"
+                  disabled={authDisabled}
+                  placeholder="At least 8 characters"
+                  type="password"
+                  {...loginForm.register("password")}
+                />
+                {loginForm.formState.errors.password ? (
+                  <p className="text-[11px] text-[var(--danger)]">
+                    {loginForm.formState.errors.password.message}
+                  </p>
+                ) : null}
+              </div>
+              {error ? <p className="text-[11px] text-[var(--danger)]">{error}</p> : null}
+              <Button className="w-full" disabled={authDisabled} type="submit">
+                Enter Pulse
+              </Button>
+            </form>
+          ) : (
+            <form
+              className="space-y-4"
+              onSubmit={registerForm.handleSubmit(async (values) => {
+                if (authDisabled) {
+                  setError(missingBackendMessage);
+                  return;
+                }
+
+                try {
+                  setError("");
+                  await register(values);
+                } catch (caughtError: any) {
+                  setError(
+                    caughtError?.response?.data?.message ??
+                      "Unable to create your account.",
+                  );
+                }
+              })}
+            >
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Username</label>
+                <input className="ig-field" disabled={authDisabled} placeholder="kenny" {...registerForm.register("username")} />
+                {registerForm.formState.errors.username ? (
+                  <p className="text-[11px] text-[var(--danger)]">
+                    {registerForm.formState.errors.username.message}
+                  </p>
+                ) : null}
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Display name</label>
+                <input
+                  className="ig-field"
+                  disabled={authDisabled}
+                  placeholder="Kenny"
+                  {...registerForm.register("displayName")}
+                />
+                {registerForm.formState.errors.displayName ? (
+                  <p className="text-[11px] text-[var(--danger)]">
+                    {registerForm.formState.errors.displayName.message}
+                  </p>
+                ) : null}
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Email</label>
+                <input
+                  className="ig-field"
+                  disabled={authDisabled}
+                  placeholder="you@example.com"
+                  type="email"
+                  {...registerForm.register("email")}
+                />
+                {registerForm.formState.errors.email ? (
+                  <p className="text-[11px] text-[var(--danger)]">
+                    {registerForm.formState.errors.email.message}
+                  </p>
+                ) : null}
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Password</label>
+                <input
+                  className="ig-field"
+                  disabled={authDisabled}
+                  placeholder="At least 8 characters"
+                  type="password"
+                  {...registerForm.register("password")}
+                />
+                {registerForm.formState.errors.password ? (
+                  <p className="text-[11px] text-[var(--danger)]">
+                    {registerForm.formState.errors.password.message}
+                  </p>
+                ) : null}
+              </div>
+              {error ? <p className="text-[11px] text-[var(--danger)]">{error}</p> : null}
+              <Button className="w-full" disabled={authDisabled} type="submit">
+                Create account
+              </Button>
+            </form>
+          )}
+        </div>
+
+        <p className="mt-6 text-center text-sm text-[var(--text-secondary)]">
+          {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
+          <button
+            className="font-semibold text-[var(--pulse-accent2)]"
+            onClick={() => {
+              setMode(mode === "login" ? "register" : "login");
+              setError("");
+            }}
+            type="button"
+          >
+            {mode === "login" ? "Sign up" : "Log in"}
+          </button>
+        </p>
       </div>
     </PageTransition>
   );

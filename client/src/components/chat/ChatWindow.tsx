@@ -3,14 +3,19 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   BellOff,
-  ImagePlus,
-  Lock,
+  ChevronLeft,
   Mic,
+  MoreHorizontal,
+  Paperclip,
+  Phone,
   Pin,
   SendHorizonal,
+  SmilePlus,
+  Video,
 } from "lucide-react";
 
 import { getSocket } from "@/lib/socket";
+import { isRealtimeConfigured } from "@/lib/runtimeConfig";
 import { useChatStore } from "@/store/chatStore";
 import { useUIStore } from "@/store/uiStore";
 import type { Message, User, ViewMode } from "@/types";
@@ -22,13 +27,14 @@ import { ReplyPreview } from "./ReplyPreview";
 import { Button } from "../ui/Button";
 import { Avatar } from "../ui/Avatar";
 import { TypingIndicator } from "./TypingIndicator";
+import { formatTypingLabel } from "./typingLabel";
 
 type ChatWindowProps = {
   roomId: string;
   roomName: string;
   currentUser: User;
   messages: Message[];
-  typingUsers: string[];
+  typingNames?: string[];
   pinnedMessages?: Message[];
   isChannel?: boolean;
   onSend: (payload: {
@@ -45,6 +51,7 @@ type ChatWindowProps = {
   avatarUrl?: string;
   headerActions?: ReactNode;
   composerPlaceholder?: string;
+  onBack?: () => void;
 };
 
 export const ChatWindow = ({
@@ -52,7 +59,7 @@ export const ChatWindow = ({
   roomName,
   currentUser,
   messages,
-  typingUsers,
+  typingNames = [],
   pinnedMessages = [],
   isChannel = false,
   onSend,
@@ -65,6 +72,7 @@ export const ChatWindow = ({
   avatarUrl,
   headerActions,
   composerPlaceholder,
+  onBack,
 }: ChatWindowProps) => {
   const [draft, setDraft] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -84,6 +92,10 @@ export const ChatWindow = ({
   const chunksRef = useRef<Blob[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const socket = useMemo(() => getSocket(), []);
+  const typingLabel = useMemo(
+    () => (isChannel ? null : formatTypingLabel(typingNames)),
+    [isChannel, typingNames],
+  );
 
   const handleSelectedFileChange = (file: File | null) => {
     setSelectedFile(file);
@@ -108,9 +120,11 @@ export const ChatWindow = ({
       }
 
       socket?.emit("typing_stop", { chatId: roomId });
+
       if (recorderRef.current?.state !== "inactive") {
         recorderRef.current.stop();
       }
+
       streamRef.current?.getTracks().forEach((track) => track.stop());
     };
   }, [roomId, socket]);
@@ -123,7 +137,7 @@ export const ChatWindow = ({
     }
 
     const handleScroll = () => {
-      setHeaderSolid(list.scrollTop > 60);
+      setHeaderSolid(list.scrollTop > 20);
     };
 
     list.addEventListener("scroll", handleScroll, { passive: true });
@@ -132,6 +146,21 @@ export const ChatWindow = ({
       list.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  useEffect(() => {
+    if (isChannel) {
+      socket?.emit("join_channel", roomId);
+    } else {
+      socket?.emit("join_chat", roomId);
+    }
+  }, [isChannel, roomId, socket]);
+
+  useEffect(() => {
+    listRef.current?.scrollTo({
+      top: listRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages.length]);
 
   const toggleVoiceRecording = async () => {
     if (isRecording) {
@@ -206,21 +235,6 @@ export const ChatWindow = ({
     }
   };
 
-  useEffect(() => {
-    if (isChannel) {
-      socket?.emit("join_channel", roomId);
-    } else {
-      socket?.emit("join_chat", roomId);
-    }
-  }, [isChannel, roomId, socket]);
-
-  useEffect(() => {
-    listRef.current?.scrollTo({
-      top: listRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [messages.length]);
-
   const handleTyping = (nextValue: string) => {
     setDraft(nextValue);
 
@@ -244,7 +258,10 @@ export const ChatWindow = ({
 
     try {
       if (editingMessage) {
-        if (!content) return;
+        if (!content) {
+          return;
+        }
+
         await onEdit(editingMessage.id, content);
         setEditingMessage(null);
         setDraft("");
@@ -276,57 +293,72 @@ export const ChatWindow = ({
 
   return (
     <>
-      <div className="flex h-full flex-col">
+      <div className="ig-chat-window">
         <div
-          className={`sticky top-0 z-10 mb-4 rounded-[18px] px-4 py-3 transition ${
-            headerSolid
-              ? "glass-elevated border border-border"
-              : "bg-transparent"
+          className={`ig-chat-window__header ${
+            headerSolid ? "ig-chat-window__header--solid" : ""
           }`}
         >
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <Avatar src={avatarUrl} alt={roomName} />
-              <div className="min-w-0">
-                <p className="truncate font-semibold">{roomName}</p>
-                <p className="truncate text-sm text-[var(--muted)]">
-                  {typingUsers.length > 0 && !isChannel
-                    ? "Someone is typing..."
-                    : isChannel
-                      ? "Broadcasts, comments, and reactions"
-                      : "Live chat in sync"}
-                </p>
-              </div>
+          <div className="flex min-w-0 items-center gap-3">
+            {onBack ? (
+              <button className="ig-icon-button lg:hidden" onClick={onBack} type="button">
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+            ) : null}
+            <Avatar src={avatarUrl} alt={roomName} size="sm" />
+            <div className="min-w-0">
+              <p className="truncate text-[13px] font-semibold">{roomName}</p>
+              <p className="truncate text-[12px] text-[var(--text-secondary)]">
+                {typingLabel
+                  ? typingLabel
+                  : isChannel
+                    ? "Broadcasts, comments, and reactions"
+                    : isRealtimeConfigured
+                      ? "Active now"
+                      : "Messages sync when you send"}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              {headerActions}
-              {muted ? (
-                <span className="rounded-full bg-white/6 px-3 py-1 text-xs text-[var(--muted)]">
-                  <BellOff className="mr-1 inline h-3 w-3" />
-                  Muted
-                </span>
-              ) : null}
-              {pinnedMessages.length > 0 ? (
-                <span className="rounded-full bg-accent/14 px-3 py-1 text-xs text-accent-2">
-                  <Pin className="mr-1 inline h-3 w-3" />
-                  {pinnedMessages.length} pinned
-                </span>
-              ) : null}
-            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {!isChannel ? (
+              <>
+                <button className="ig-icon-button" type="button">
+                  <Video className="h-4 w-4" />
+                </button>
+                <button className="ig-icon-button" type="button">
+                  <Phone className="h-4 w-4" />
+                </button>
+              </>
+            ) : null}
+            {headerActions}
+            <button className="ig-icon-button" type="button">
+              <MoreHorizontal className="h-4 w-4" />
+            </button>
+            {muted ? (
+              <span className="ig-pill">
+                <BellOff className="h-3 w-3" />
+                Muted
+              </span>
+            ) : null}
+            {pinnedMessages.length > 0 ? (
+              <span className="ig-pill">
+                <Pin className="h-3 w-3" />
+                {pinnedMessages.length}
+              </span>
+            ) : null}
           </div>
         </div>
 
-        <div ref={listRef} className="scrollbar-hidden flex-1 space-y-4 overflow-y-auto pr-1">
+        <div ref={listRef} className="ig-chat-window__feed scrollbar-hidden">
           {pinnedMessages.length > 0 ? (
-            <div className="glass-elevated rounded-[16px] px-4 py-3">
-              <p className="text-xs uppercase tracking-[0.24em] text-accent-2">
-                Pinned messages
-              </p>
+            <div className="ig-soft-card mb-4 p-4">
+              <p className="ig-section-label">Pinned</p>
               <div className="mt-3 space-y-2">
                 {pinnedMessages.map((message) => (
                   <button
                     key={message.id}
-                    className="w-full rounded-[12px] bg-white/4 px-3 py-2 text-left text-sm text-[var(--muted)] transition hover:bg-white/8"
+                    className="w-full rounded-[14px] border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-left text-sm text-[var(--text-secondary)]"
                     onClick={() => onOpenMedia(message)}
                     type="button"
                   >
@@ -338,54 +370,67 @@ export const ChatWindow = ({
             </div>
           ) : null}
 
-          {messages.map((message) => (
-            <motion.div key={message.id} layout>
-              <MessageBubble
-                message={message}
-                currentUserId={currentUser.id}
-                pinned={pinnedMessages.some((pinned) => pinned.id === message.id)}
-                onReply={(item) => setReplyingTo(item)}
-                onReact={onReact}
-                onDelete={onDelete}
-                onEdit={(item) => {
-                  setEditingMessage(item);
-                  setDraft(item.content ?? "");
+          <div className="ig-message-feed">
+            {messages.map((message, index) => (
+              <motion.div
+                key={message.id}
+                layout
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: Math.min(index * 0.03, 0.18),
+                  duration: 0.2,
+                  ease: "easeOut",
                 }}
-                onOpenMedia={onOpenMedia}
-                onPin={onPinMessage}
-              />
-            </motion.div>
-          ))}
+              >
+                <MessageBubble
+                  message={message}
+                  currentUserId={currentUser.id}
+                  pinned={pinnedMessages.some((pinned) => pinned.id === message.id)}
+                  onReply={(item) => setReplyingTo(item)}
+                  onReact={onReact}
+                  onDelete={onDelete}
+                  onEdit={(item) => {
+                    setEditingMessage(item);
+                    setDraft(item.content ?? "");
+                  }}
+                  onOpenMedia={onOpenMedia}
+                  onPin={onPinMessage}
+                />
+              </motion.div>
+            ))}
 
-          {typingUsers.length > 0 && !isChannel ? <TypingIndicator /> : null}
+            {typingLabel ? <TypingIndicator /> : null}
+          </div>
         </div>
 
-        <div className="mt-4 space-y-3">
+        <div className="ig-chat-window__composer">
           {replyingTo ? (
             <ReplyPreview message={replyingTo} onClear={() => setReplyingTo(null)} />
           ) : null}
           {editingMessage ? (
-            <div className="rounded-[12px] border border-accent/20 bg-accent/10 px-3 py-2 text-sm text-[var(--muted)]">
-              Editing your message. Send to save.
+            <div className="ig-chat-window__notice mt-3">
+              Editing your message. Send to save changes.
             </div>
           ) : null}
           {isRecording ? (
-            <div className="rounded-[12px] border border-danger/20 bg-danger/10 px-3 py-2 text-sm text-[var(--muted)]">
+            <div className="ig-chat-window__notice mt-3">
               Recording voice note. Tap the mic again to stop and attach it.
             </div>
           ) : null}
-          <div
-            className={`glass-elevated flex items-end gap-3 rounded-[18px] border px-3 py-3 transition ${
-              isComposerFocused ? "border-accent/40 shadow-glow" : "border-border"
-            }`}
-          >
-            <div className="flex gap-2">
+
+          <div className="ig-chat-window__composer-shell">
+            <div
+              className={`ig-chat-window__composer-main ${
+                isComposerFocused ? "ig-chat-window__composer-main--focused" : ""
+              }`}
+            >
               <button
-                className="rounded-full bg-white/6 p-3 text-[var(--muted)] transition hover:bg-white/12 hover:text-[var(--ink)]"
+                className="ig-icon-button"
                 onClick={() => fileInputRef.current?.click()}
                 type="button"
               >
-                <ImagePlus className="h-4 w-4" />
+                <Paperclip className="h-4 w-4" />
               </button>
               <input
                 ref={fileInputRef}
@@ -398,45 +443,44 @@ export const ChatWindow = ({
                   event.currentTarget.value = "";
                 }}
               />
+              <textarea
+                className="ig-chat-window__textarea"
+                placeholder={
+                  composerPlaceholder ??
+                  (isChannel ? "Message channel..." : "Message...")
+                }
+                rows={1}
+                value={draft}
+                onBlur={() => setIsComposerFocused(false)}
+                onChange={(event) => handleTyping(event.target.value)}
+                onFocus={() => setIsComposerFocused(true)}
+              />
               <button
-                className="rounded-full bg-white/6 p-3 text-[var(--muted)] transition hover:bg-white/12 hover:text-[var(--ink)]"
-                onClick={() => void toggleVoiceRecording()}
-                type="button"
-              >
-                <Mic className="h-4 w-4" />
-              </button>
-              <button
-                className="rounded-full bg-white/6 p-3 text-[var(--muted)] transition hover:bg-white/12 hover:text-[var(--ink)]"
+                className="ig-icon-button"
                 onClick={() =>
                   pushToast({
-                    title: "View Once tip",
-                    description: "Choose View Once to limit replay of photos and videos inside Pulse.",
+                    title: "Emoji reactions",
+                    description: "Long press any message to react instantly.",
                   })
                 }
                 type="button"
               >
-                <Lock className="h-4 w-4" />
+                <SmilePlus className="h-4 w-4" />
               </button>
+              {draft.trim() || editingMessage ? (
+                <button className="ig-icon-button ig-icon-button--solid" onClick={handleSubmit} type="button">
+                  <SendHorizonal className="h-4 w-4" />
+                </button>
+              ) : (
+                <button
+                  className="ig-icon-button ig-icon-button--solid"
+                  onClick={() => void toggleVoiceRecording()}
+                  type="button"
+                >
+                  <Mic className="h-4 w-4" />
+                </button>
+              )}
             </div>
-            <textarea
-              className="min-h-12 flex-1 resize-none border-0 bg-transparent px-2 py-2 text-sm outline-none placeholder:text-[var(--muted)]"
-              placeholder={
-                composerPlaceholder ??
-                (isChannel ? "Write a channel post or comment..." : "Write a message...")
-              }
-              rows={1}
-              value={draft}
-              onBlur={() => setIsComposerFocused(false)}
-              onChange={(event) => handleTyping(event.target.value)}
-              onFocus={() => setIsComposerFocused(true)}
-            />
-            <Button
-              size="lg"
-              iconLeft={<SendHorizonal className="h-4 w-4" />}
-              onClick={handleSubmit}
-            >
-              {editingMessage ? "Save" : "Send"}
-            </Button>
           </div>
         </div>
       </div>
@@ -444,7 +488,7 @@ export const ChatWindow = ({
       <BottomSheet
         open={mediaSheetOpen && Boolean(selectedFile)}
         onClose={() => handleSelectedFileChange(null)}
-        title="Attach media"
+        title="Media picker"
       >
         <div className="space-y-4">
           <MediaPicker

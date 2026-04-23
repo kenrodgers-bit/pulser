@@ -14,19 +14,11 @@ export const ReplyPreview = ({
   compact = false,
   onClear,
 }: ReplyPreviewProps) => (
-  <div
-    className={cn(
-      "relative flex items-start gap-3 overflow-hidden rounded-[12px] border border-white/8 bg-white/5 px-3 py-2",
-      compact && "px-2.5 py-2",
-    )}
-  >
-    <span className="absolute inset-y-0 left-0 w-[3px] bg-accent" />
-    <Reply className="mt-0.5 h-4 w-4 text-accent" />
+  <div className={cn("ig-reply-preview", compact && "px-3 py-2")}>
+    <Reply className="mt-0.5 h-4 w-4 text-[var(--unread)]" />
     <div className="min-w-0 flex-1">
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent/80">
-        Replying
-      </p>
-      <p className="truncate text-sm text-[var(--muted)]">
+      <p className="text-[11px] font-semibold text-[var(--unread)]">Replying</p>
+      <p className="truncate text-sm text-[var(--text-secondary)]">
         {message.type === "text"
           ? message.content
           : `${message.type[0].toUpperCase()}${message.type.slice(1)} attachment`}
@@ -34,7 +26,7 @@ export const ReplyPreview = ({
     </div>
     {onClear ? (
       <button
-        className="rounded-full bg-white/6 p-1.5 text-[var(--muted)] transition hover:bg-white/10 hover:text-[var(--ink)]"
+        className="ig-icon-button h-8 w-8 rounded-full"
         onClick={onClear}
         type="button"
       >

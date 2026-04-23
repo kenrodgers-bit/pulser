@@ -28,6 +28,9 @@ type Friend = ChatParticipant & {
   bio?: string;
 };
 
+const resolveParticipantName = (participant?: ChatParticipant | null) =>
+  participant?.displayName || participant?.username || null;
+
 const resolveChatTitle = (chat: Chat, currentUserId: string) => {
   if (chat.isGroup) {
     return chat.groupName || "Group";
@@ -59,13 +62,51 @@ const getPopulatedParticipants = (chat: Chat) =>
     (participant): participant is ChatParticipant => typeof participant !== "string",
   );
 
+const resolveTypingNames = (
+  chat: Chat | null,
+  messages: Message[],
+  typingUserIds: string[],
+  currentUserId: string,
+) => {
+  if (!chat || typingUserIds.length === 0) {
+    return [];
+  }
+
+  const namesByUserId = new Map<string, string>();
+
+  getPopulatedParticipants(chat).forEach((participant) => {
+    const name = resolveParticipantName(participant);
+
+    if (name) {
+      namesByUserId.set(participant.id, name);
+    }
+  });
+
+  messages.forEach((message) => {
+    const name = resolveParticipantName(message.sender);
+
+    if (message.sender?.id && name && !namesByUserId.has(message.sender.id)) {
+      namesByUserId.set(message.sender.id, name);
+    }
+  });
+
+  return typingUserIds.flatMap((userId) => {
+    if (userId === currentUserId) {
+      return [];
+    }
+
+    const name = namesByUserId.get(userId);
+    return name ? [name] : [];
+  });
+};
+
 export const ChatPage = () => {
   const { chatId } = useParams<{ chatId: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user)!;
   const chats = useChatStore((state) => state.chats);
-  const typingUsers = useChatStore((state) => state.typingByRoom[chatId ?? ""] ?? []);
+  const typingUserIds = useChatStore((state) => state.typingByRoom[chatId ?? ""] ?? []);
   const messages = useChatStore((state) => state.messagesByChatId[chatId ?? ""] ?? []);
   const upsertChat = useChatStore((state) => state.upsertChat);
   const [pinnedMessages, setPinnedMessages] = useState<Message[]>([]);
@@ -211,6 +252,10 @@ export const ChatPage = () => {
     const participantIds = new Set(groupParticipants.map((participant) => participant.id));
     return friends.filter((friend) => !participantIds.has(friend.id));
   }, [friends, groupParticipants]);
+  const typingNames = useMemo(
+    () => resolveTypingNames(chat, messages, typingUserIds, user.id),
+    [chat, messages, typingUserIds, user.id],
+  );
 
   if (!chatId) {
     return null;
@@ -218,19 +263,19 @@ export const ChatPage = () => {
 
   if (loadError && !chat) {
     return (
-      <div className="glass-panel grid h-full min-h-[60vh] place-items-center rounded-[2rem] p-6">
-        <div className="max-w-md text-center">
-          <p className="font-heading text-2xl font-semibold">Conversation unavailable</p>
-          <p className="mt-2 text-sm text-[var(--muted)]">{loadError}</p>
-        </div>
+      <div className="ig-empty-state">
+        <div className="ig-empty-art" />
+        <p className="text-[15px] text-[var(--text-secondary)]">Conversation unavailable</p>
+        <p className="text-sm text-[var(--text-secondary)]">{loadError}</p>
       </div>
     );
   }
 
   if (!chat) {
     return (
-      <div className="glass-panel grid h-full min-h-[60vh] place-items-center rounded-[2rem]">
-        <p className="text-sm text-[var(--muted)]">Loading chat...</p>
+      <div className="ig-empty-state">
+        <div className="ig-empty-art" />
+        <p className="text-sm text-[var(--text-secondary)]">Loading chat...</p>
       </div>
     );
   }
@@ -284,7 +329,7 @@ export const ChatPage = () => {
   return (
     <>
       <motion.div
-        className="glass-panel h-[calc(100vh-9rem)] rounded-[20px] p-4 md:p-5"
+        className="ig-panel h-[calc(100vh-9rem)]"
         drag={window.innerWidth < 1024 ? "x" : false}
         dragConstraints={{ left: 0, right: 0 }}
         onDragEnd={(_event, info) => {
@@ -299,9 +344,10 @@ export const ChatPage = () => {
           avatarUrl={resolveChatAvatar(chat, user.id)}
           currentUser={user}
           messages={messages}
-          typingUsers={typingUsers.filter((id) => id !== user.id)}
+          typingNames={typingNames}
           pinnedMessages={pinnedMessages}
           muted={chat.mutedBy.includes(user.id)}
+          onBack={() => navigate(-1)}
           headerActions={
             <>
               <Button
@@ -368,12 +414,12 @@ export const ChatPage = () => {
       <Modal open={groupPanelOpen} onClose={() => setGroupPanelOpen(false)} title="Group details">
         {chat.isGroup ? (
           <div className="space-y-5">
-            <div className="rounded-[1.5rem] border border-white/10 bg-white/4 p-4">
+            <div className="ig-soft-card p-4">
               <div className="flex items-center gap-3">
                 <Avatar src={chat.groupAvatar} alt={chat.groupName ?? "Group"} />
                 <div>
                   <p className="font-semibold">{chat.groupName}</p>
-                  <p className="text-sm text-[var(--muted)]">
+                  <p className="text-sm text-[var(--text-secondary)]">
                     {groupParticipants.length} members
                   </p>
                 </div>
@@ -384,7 +430,7 @@ export const ChatPage = () => {
               <section className="space-y-3">
                 <p className="text-sm font-semibold">Update group</p>
                 <input
-                  className="h-12 w-full rounded-[1.2rem] border border-white/10 bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+                  className="ig-field"
                   placeholder="Group name"
                   value={groupForm.groupName}
                   onChange={(event) =>
@@ -395,7 +441,7 @@ export const ChatPage = () => {
                   }
                 />
                 <textarea
-                  className="min-h-24 w-full rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-3 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+                  className="ig-textarea"
                   placeholder="Group description"
                   value={groupForm.groupDescription}
                   onChange={(event) =>
@@ -442,7 +488,7 @@ export const ChatPage = () => {
                     Copy
                   </Button>
                 </div>
-                <div className="rounded-[1.3rem] border border-white/10 bg-white/4 px-4 py-3 text-sm text-[var(--muted)]">
+                <div className="ig-soft-card px-4 py-3 text-sm text-[var(--text-secondary)]">
                   {inviteLink || "Generating invite link..."}
                 </div>
               </section>
@@ -451,17 +497,17 @@ export const ChatPage = () => {
             {canManageGroup && availableFriends.length > 0 ? (
               <section className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <UserPlus className="h-4 w-4 text-accent" />
+                  <UserPlus className="h-4 w-4 text-[var(--unread)]" />
                   <p className="text-sm font-semibold">Add friends</p>
                 </div>
                 <div className="max-h-52 space-y-2 overflow-y-auto pr-1">
                   {availableFriends.map((friend) => (
                     <button
                       key={friend.id}
-                      className={`flex w-full items-center justify-between rounded-[1.2rem] border px-3 py-3 text-left transition ${
+                      className={`ig-list-row w-full text-left ${
                         selectedMemberIds.includes(friend.id)
-                          ? "border-accent/30 bg-accent-soft/60"
-                          : "border-white/10 bg-white/4 hover:bg-white/7"
+                          ? "ring-1 ring-[var(--unread)]"
+                          : ""
                       }`}
                       onClick={() =>
                         setSelectedMemberIds((current) =>
@@ -476,10 +522,10 @@ export const ChatPage = () => {
                         <Avatar src={friend.avatarUrl} alt={friend.displayName} size="sm" />
                         <div>
                           <p className="text-sm font-medium">{friend.displayName}</p>
-                          <p className="text-xs text-[var(--muted)]">@{friend.username}</p>
+                          <p className="text-xs text-[var(--text-secondary)]">@{friend.username}</p>
                         </div>
                       </div>
-                      <span className="text-xs text-[var(--muted)]">
+                      <span className="text-xs text-[var(--text-secondary)]">
                         {selectedMemberIds.includes(friend.id) ? "Selected" : "Tap to add"}
                       </span>
                     </button>
@@ -513,19 +559,16 @@ export const ChatPage = () => {
                   const isAdmin = chat.admins.includes(participant.id);
 
                   return (
-                    <div
-                      key={participant.id}
-                      className="rounded-[1.3rem] border border-white/10 bg-white/4 px-4 py-3"
-                    >
+                    <div key={participant.id} className="ig-soft-card px-4 py-3">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
                           <Avatar src={participant.avatarUrl} alt={participant.displayName} size="sm" />
                           <div>
                             <p className="text-sm font-medium">{participant.displayName}</p>
-                            <p className="text-xs text-[var(--muted)]">@{participant.username}</p>
+                            <p className="text-xs text-[var(--text-secondary)]">@{participant.username}</p>
                           </div>
                         </div>
-                        <span className="rounded-full bg-white/8 px-3 py-1 text-xs text-[var(--muted)]">
+                        <span className="ig-pill">
                           {isOwner ? "Owner" : isAdmin ? "Admin" : "Member"}
                         </span>
                       </div>

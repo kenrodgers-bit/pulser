@@ -1,0 +1,11 @@
+.env
+.env.*
+**/.env
+**/.env.*
+!client/.env.example
+!server/.env.example
+!.env.example
+client/dist
+server/dist
+coverage
+*.log

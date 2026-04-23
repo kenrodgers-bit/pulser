@@ -39,10 +39,11 @@ const AppShell = lazy(() =>
 );
 
 const RouteLoader = ({ message = "Loading..." }: { message?: string }) => (
-  <div className="grid min-h-screen place-items-center bg-[var(--bg)]">
-    <div className="glass-elevated rounded-[20px] px-8 py-6 text-center shadow-modal">
-      <p className="font-heading text-3xl font-semibold tracking-[-0.03em]">Pulse</p>
-      <p className="mt-2 text-sm text-[var(--muted)]">{message}</p>
+  <div className="ig-auth-shell">
+    <div className="ig-auth-card text-center">
+      <div className="ig-logo-square ig-logo-square--large mx-auto">P</div>
+      <p className="ig-wordmark mt-5 text-[32px] text-[var(--white)]">Pulse</p>
+      <p className="mt-2 text-sm text-[var(--text-secondary)]">{message}</p>
     </div>
   </div>
 );
@@ -104,11 +105,12 @@ const AppInner = () => {
   useEffect(() => {
     if (needRefresh[0]) {
       pushToast({
-        title: "Update available",
-        description: "Refresh when ready to pull the latest Pulse build.",
+        title: "Updating Pulse",
+        description: "Refreshing now so the latest production build is active.",
       });
+      void updateServiceWorker(true);
     }
-  }, [needRefresh, pushToast]);
+  }, [needRefresh, pushToast, updateServiceWorker]);
 
   return (
     <>
@@ -148,7 +150,7 @@ const AppInner = () => {
       </AnimatePresence>
       {needRefresh[0] ? (
         <button
-          className="fixed bottom-28 right-4 z-50 rounded-full bg-accent px-4 py-3 text-sm font-semibold text-white shadow-glow"
+          className="ig-button ig-button--primary ig-button--md fixed bottom-28 right-4 z-50"
           onClick={() => updateServiceWorker(true)}
         >
           Update Pulse

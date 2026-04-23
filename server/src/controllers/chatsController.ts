@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
 
+import { resolveClientUrl } from "../config/env";
 import { Chat } from "../models/Chat";
 import { Message } from "../models/Message";
 import { User } from "../models/User";
@@ -307,7 +308,10 @@ export const getGroupInviteLink = asyncHandler(async (req, res) => {
 
   sendSuccess(res, {
     inviteCode: chat.inviteCode,
-    inviteLink: `${process.env.CLIENT_URL ?? "http://localhost:5173"}/chat/${chat._id}?invite=${chat.inviteCode}`,
+    inviteLink: resolveClientUrl(
+      `/chat/${chat._id}?invite=${chat.inviteCode}`,
+      req,
+    ),
   });
 });
 

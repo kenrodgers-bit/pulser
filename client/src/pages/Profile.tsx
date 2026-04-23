@@ -89,22 +89,22 @@ export const ProfilePage = () => {
       : pushEndpoint && pushSavedOnServer
         ? "Push is active on this device."
         : pushEndpoint
-          ? "This device has a browser subscription that still needs to be synced with Pulse."
+          ? "This device still needs to be synced with Pulse."
           : pushPermission === "denied"
             ? "Browser notification permission is blocked."
             : "Push is not active on this device yet.";
 
   return (
     <PageTransition className="space-y-4">
-      <section className="glass-panel rounded-[20px] p-5 md:p-6">
+      <section className="ig-panel">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
-            <Avatar src={user.avatarUrl} alt={user.displayName} size="xl" />
+            <Avatar src={user.avatarUrl} alt={user.displayName} size="xl" ring={activeStoryCount > 0} />
             <div>
-              <p className="font-heading text-3xl font-semibold tracking-[-0.03em]">{user.displayName}</p>
-              <p className="mt-1 text-[var(--muted)]">@{user.username}</p>
-              <p className="mt-3 max-w-2xl text-sm text-[var(--muted)]">
-                {user.bio || "Add a bio in Settings to personalise your Pulse card."}
+              <p className="ig-wordmark text-[30px]">{user.displayName}</p>
+              <p className="mt-1 text-[var(--text-secondary)]">@{user.username}</p>
+              <p className="mt-3 max-w-2xl text-sm text-[var(--text-secondary)]">
+                {user.bio || "Add a bio in Settings to personalize your Pulse card."}
               </p>
             </div>
           </div>
@@ -135,30 +135,30 @@ export const ProfilePage = () => {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="ig-grid-3">
         {[
-          ["Chats", chats.length.toString()],
+          ["Friends", chats.length.toString()],
+          ["Stories", activeStoryCount.toString()],
           ["Channels", channels.length.toString()],
-          ["Your active stories", activeStoryCount.toString()],
         ].map(([label, value]) => (
-          <div key={label} className="glass-panel rounded-[16px] p-5">
-            <p className="text-sm text-[var(--muted)]">{label}</p>
-            <p className="mt-4 font-heading text-4xl font-semibold">{value}</p>
+          <div key={label} className="ig-stat-card">
+            <p className="text-sm text-[var(--text-secondary)]">{label}</p>
+            <p className="ig-stat-card__value">{value}</p>
           </div>
         ))}
       </section>
 
-      <section className="glass-panel rounded-[20px] p-5">
-        <p className="font-semibold">Device and notification setup</p>
-        <p className="mt-2 max-w-2xl text-sm text-[var(--muted)]">
-          Pulse is ready to install as a standalone app and can subscribe to Web Push
-          so new messages show up even when the tab is closed.
+      <section className="ig-panel">
+        <p className="text-sm font-semibold">Device and notification setup</p>
+        <p className="mt-2 max-w-2xl text-sm text-[var(--text-secondary)]">
+          Pulse is ready to install as a standalone app and can subscribe to Web Push so
+          new messages show up even when the tab is closed.
         </p>
-        <div className="mt-5 rounded-[16px] border border-border bg-white/4 px-4 py-4">
+        <div className="mt-5 ig-soft-card p-4">
           <p className="text-sm font-medium">Push status</p>
-          <p className="mt-2 text-sm text-[var(--muted)]">{pushStatusLabel}</p>
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">{pushStatusLabel}</p>
           {pushEndpoint ? (
-            <p className="mt-2 truncate text-xs text-[var(--muted)]">
+            <p className="mt-2 truncate text-xs text-[var(--text-muted)]">
               Endpoint: {pushEndpoint}
             </p>
           ) : null}

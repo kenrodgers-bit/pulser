@@ -85,15 +85,11 @@ export const SetupProfilePage = () => {
   }
 
   return (
-    <PageTransition className="flex min-h-screen items-center justify-center px-4 py-8">
-      <div className="glass-elevated w-full max-w-md rounded-[24px] border border-border p-6 shadow-modal md:p-8">
-        <p className="text-xs uppercase tracking-[0.24em] text-accent-2">
-          Setup profile
-        </p>
-        <h1 className="mt-3 font-heading text-3xl font-semibold tracking-[-0.04em]">
-          Choose your username
-        </h1>
-        <p className="mt-3 text-sm text-[var(--muted)]">
+    <PageTransition className="ig-auth-shell">
+      <div className="ig-auth-card">
+        <p className="ig-section-label">Setup profile</p>
+        <h1 className="ig-section-title mt-3">Choose your username</h1>
+        <p className="mt-3 text-sm text-[var(--text-secondary)]">
           Your Google account is connected. Pick the username people will use to find you in
           Pulse.
         </p>
@@ -101,13 +97,13 @@ export const SetupProfilePage = () => {
         <div className="mt-6 space-y-2">
           <label className="text-sm font-medium">Username</label>
           <input
-            className="h-12 w-full rounded-[12px] border border-border bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+            className="ig-field"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
           />
           <p
-            className={`text-xs ${
-              availability.available ? "text-emerald-400" : "text-[var(--muted)]"
+            className={`text-[11px] ${
+              availability.available ? "text-emerald-400" : "text-[var(--text-secondary)]"
             }`}
           >
             {availability.checking ? "Checking username..." : availability.message}

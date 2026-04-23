@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
 
 import { useUIStore } from "@/store/uiStore";
 
@@ -19,12 +20,12 @@ export const ToastViewport = () => {
   }, [dismissToast, toasts]);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-3 z-[70] flex flex-col items-center gap-3 px-4">
+    <div className="ig-toast-stack pointer-events-none">
       <AnimatePresence>
         {toasts.map((toast) => (
           <motion.div
             key={toast.id}
-            className="glass-elevated pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-[14px] border border-border px-4 py-3 shadow-glass"
+            className="ig-toast pointer-events-auto"
             initial={{ opacity: 0, y: -80 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -40 }}
@@ -37,15 +38,23 @@ export const ToastViewport = () => {
               }
             }}
           >
-            <div className="mt-1 h-10 w-10 rounded-full bg-accent/16 ring-1 ring-accent/20" />
+            <div className="ig-toast__avatar">
+              {toast.title.slice(0, 1).toUpperCase()}
+            </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold">{toast.title}</p>
               {toast.description ? (
-                <p className="mt-1 text-sm text-[var(--muted)]">
-                  {toast.description}
-                </p>
+                <p className="mt-1 text-sm text-[var(--text-secondary)]">{toast.description}</p>
               ) : null}
             </div>
+            <button
+              aria-label="Dismiss notification"
+              className="ig-icon-button h-8 w-8 rounded-full"
+              onClick={() => dismissToast(toast.id)}
+              type="button"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </motion.div>
         ))}
       </AnimatePresence>

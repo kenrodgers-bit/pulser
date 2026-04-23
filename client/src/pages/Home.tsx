@@ -40,18 +40,17 @@ export const HomePage = () => {
   return (
     <>
       <PageTransition className="space-y-4">
-        <section className="glass-panel rounded-[20px] p-4 md:p-5">
-          <div className="flex items-end justify-between gap-4">
+        <section className="ig-panel">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-accent-2">
-                Home
-              </p>
-              <h2 className="mt-2 font-heading text-3xl font-semibold tracking-[-0.03em]">
-                Stories, chats, and late-night updates
+              <p className="ig-section-label">Home</p>
+              <h2 className="ig-section-title mt-3">
+                Stories, chats, and night-shift updates
               </h2>
-              <p className="mt-2 max-w-2xl text-sm text-[var(--muted)]">
-                Keep your closest circle moving with story drops, view-once photos,
-                and instant chat handoff across mobile and desktop.
+              <p className="ig-copy mt-3 max-w-2xl">
+                Keep your circle moving with polished stories, private chats, view-once
+                media, and an installable dark-mode shell that feels native on mobile and
+                desktop.
               </p>
             </div>
             <div className="hidden lg:block">
@@ -59,7 +58,7 @@ export const HomePage = () => {
             </div>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 rounded-[20px] border border-[var(--border-soft)] bg-[var(--bg-surface)]">
             <StoriesBar
               currentUserId={user.id}
               stories={stories}
@@ -67,7 +66,7 @@ export const HomePage = () => {
               leading={
                 ownStoryGroup ? (
                   <motion.button
-                    className="flex min-w-[4.75rem] flex-col items-center gap-2 text-center"
+                    className="ig-story-item"
                     onClick={() => setActiveStoryGroup(ownStoryGroup)}
                     type="button"
                     whileTap={{ scale: 0.96 }}
@@ -75,22 +74,22 @@ export const HomePage = () => {
                     <motion.div layoutId={`story-circle-${user.id}`}>
                       <Avatar src={user.avatarUrl} alt={user.displayName} size="lg" />
                     </motion.div>
-                    <span className="line-clamp-2 text-xs text-[var(--muted)]">Your story</span>
+                    <span className="ig-story-item__name">Your story</span>
                   </motion.button>
                 ) : (
                   <StoryUploader
                     onUploaded={refreshStories}
                     trigger={(open) => (
                       <motion.button
-                        className="flex min-w-[4.75rem] flex-col items-center gap-2 text-center"
+                        className="ig-story-item"
                         onClick={open}
                         type="button"
                         whileTap={{ scale: 0.96 }}
                       >
-                        <div className="grid h-14 w-14 place-items-center rounded-full border border-dashed border-border bg-white/4">
-                          <Plus className="h-5 w-5 text-accent" />
+                        <div className="grid h-[52px] w-[52px] place-items-center rounded-full border border-dashed border-[var(--border)] bg-[var(--bg-surface)]">
+                          <Plus className="h-4 w-4 text-[var(--unread)]" />
                         </div>
-                        <span className="line-clamp-2 text-xs text-[var(--muted)]">Your story</span>
+                        <span className="ig-story-item__name">Your story</span>
                       </motion.button>
                     )}
                   />
@@ -101,14 +100,12 @@ export const HomePage = () => {
         </section>
 
         <section className="grid gap-4 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
-          <div className="glass-panel rounded-[20px] p-4 md:p-5">
-            <div className="mb-5 flex items-center justify-between">
+          <div className="ig-panel">
+            <div className="mb-5 flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs uppercase tracking-[0.24em] text-accent-2">
-                  Conversations
-                </p>
-                <p className="mt-2 text-sm text-[var(--muted)]">
-                  Pick up exactly where the thread stopped.
+                <p className="ig-section-label">Conversations</p>
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                  Tap back into the thread exactly where it left off.
                 </p>
               </div>
               <Button variant="secondary" onClick={() => navigate("/discover?compose=1")}>
@@ -120,47 +117,39 @@ export const HomePage = () => {
               <ChatList chats={chats} currentUser={user} onlineUserIds={onlineUserIds} />
             </div>
 
-            <div className="hidden lg:grid grid-cols-2 gap-3">
-              <div className="rounded-[16px] border border-border bg-white/4 p-4">
-                <p className="text-sm font-semibold">Story rails</p>
-                <p className="mt-3 font-heading text-4xl font-semibold">
-                  {stories.length}
-                </p>
-                <p className="mt-2 text-sm text-[var(--muted)]">
-                  Active across your friend graph right now.
+            <div className="hidden lg:grid lg:grid-cols-2 lg:gap-4">
+              <div className="ig-stat-card">
+                <p className="text-sm text-[var(--text-secondary)]">Story rails</p>
+                <p className="ig-stat-card__value">{stories.length}</p>
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                  Active across your graph right now.
                 </p>
               </div>
-              <div className="rounded-[16px] border border-border bg-white/4 p-4">
-                <p className="text-sm font-semibold">Open chats</p>
-                <p className="mt-3 font-heading text-4xl font-semibold">
-                  {chats.length}
-                </p>
-                <p className="mt-2 text-sm text-[var(--muted)]">
-                  Synced and ready across screens.
+              <div className="ig-stat-card">
+                <p className="text-sm text-[var(--text-secondary)]">Open chats</p>
+                <p className="ig-stat-card__value">{chats.length}</p>
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                  Ready to reopen instantly.
                 </p>
               </div>
             </div>
 
             {chats.length === 0 ? (
-              <div className="mt-5 rounded-[18px] border border-dashed border-border bg-white/4 px-6 py-10 text-center">
-                <div className="mx-auto mb-5 h-20 w-20 rounded-[22px] border border-border bg-white/4" />
-                <p className="font-heading text-2xl font-semibold">No conversations yet</p>
-                <p className="mt-2 text-sm text-[var(--muted)]">
-                  Search for friends and start chatting.
+              <div className="mt-5 ig-empty-state">
+                <div className="ig-empty-art" />
+                <p className="text-[15px] text-[var(--text-secondary)]">No messages yet</p>
+                <p className="text-[12px] text-[var(--text-muted)]">
+                  Search for friends to start chatting.
                 </p>
-                <Button className="mt-5" onClick={() => navigate("/discover")}>
-                  Find Friends
-                </Button>
+                <Button onClick={() => navigate("/discover")}>Find Friends</Button>
               </div>
             ) : null}
           </div>
 
           <div className="space-y-4">
-            <section className="glass-panel rounded-[20px] p-5">
-              <p className="text-xs uppercase tracking-[0.24em] text-accent-2">
-                Quick launch
-              </p>
-              <div className="mt-4 grid gap-3">
+            <section className="ig-panel">
+              <p className="ig-section-label">Quick launch</p>
+              <div className="mt-4 space-y-3">
                 {[
                   {
                     title: "Find friends",
@@ -169,34 +158,32 @@ export const HomePage = () => {
                   },
                   {
                     title: "Browse channels",
-                    copy: "Jump into public broadcasts or manage your private invites.",
+                    copy: "Jump into public broadcasts or manage private invites.",
                     to: "/channels",
                   },
                 ].map((item) => (
                   <button
                     key={item.title}
-                    className="glass-elevated flex items-center justify-between rounded-[16px] border border-border px-4 py-4 text-left transition hover:bg-white/10"
+                    className="ig-list-row w-full text-left"
                     onClick={() => navigate(item.to)}
                     type="button"
                   >
                     <div>
-                      <p className="font-semibold">{item.title}</p>
-                      <p className="mt-1 text-sm text-[var(--muted)]">{item.copy}</p>
+                      <p className="text-sm font-semibold">{item.title}</p>
+                      <p className="mt-1 text-sm text-[var(--text-secondary)]">{item.copy}</p>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-accent-2" />
+                    <ArrowRight className="h-4 w-4 text-[var(--unread)]" />
                   </button>
                 ))}
               </div>
             </section>
 
-            <section className="glass-panel rounded-[20px] p-5">
-              <p className="text-xs uppercase tracking-[0.24em] text-accent-2">
-                Tonight on Pulse
-              </p>
-              <ul className="mt-4 space-y-4 text-sm text-[var(--muted)]">
-                <li>{stories.length} story rails are active for your close friends.</li>
+            <section className="ig-panel">
+              <p className="ig-section-label">Tonight on Pulse</p>
+              <ul className="mt-4 space-y-4 text-sm text-[var(--text-secondary)]">
+                <li>{stories.length} story rails are active for your circle.</li>
                 <li>{chats.length} chats are synced and ready to reopen instantly.</li>
-                <li>View Once media is available the moment you attach a photo or video.</li>
+                <li>View Once media is ready the moment you attach a photo or video.</li>
               </ul>
             </section>
           </div>

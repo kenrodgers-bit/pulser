@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import type { Request, Response } from "express";
 import { Types } from "mongoose";
 
-import { env } from "../config/env";
+import { env, resolveClientUrl } from "../config/env";
 import { Channel } from "../models/Channel";
 import { Chat } from "../models/Chat";
 import { User } from "../models/User";
@@ -183,7 +183,7 @@ export const completeGoogleAuth = asyncHandler(async (req, res) => {
   }
 
   await issueUserSession(req.user, req, res);
-  res.redirect(`${env.clientUrl}/auth/success`);
+  res.redirect(resolveClientUrl("/auth/success", req));
 });
 
 export const updateProfile = asyncHandler(async (req, res) => {

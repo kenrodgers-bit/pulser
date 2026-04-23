@@ -58,12 +58,12 @@ export const StoryUploader = ({ onUploaded, trigger }: StoryUploaderProps) => {
           iconLeft={<Plus className="h-4 w-4" />}
           onClick={() => setOpen(true)}
         >
-          Story
+          Add story
         </Button>
       )}
       <Modal open={open} onClose={() => setOpen(false)} title="Share a story">
         <div className="space-y-4">
-          <label className="flex h-36 cursor-pointer items-center justify-center rounded-[14px] border border-dashed border-border bg-white/4 text-sm text-[var(--muted)] transition hover:bg-white/6">
+          <label className="ig-empty-state min-h-[180px] cursor-pointer">
             {file ? file.name : "Choose an image or video"}
             <input
               className="hidden"
@@ -73,7 +73,7 @@ export const StoryUploader = ({ onUploaded, trigger }: StoryUploaderProps) => {
             />
           </label>
           <textarea
-            className="min-h-24 w-full rounded-[12px] border border-border bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+            className="ig-textarea"
             placeholder="Add a caption..."
             value={caption}
             onChange={(event) => setCaption(event.target.value)}

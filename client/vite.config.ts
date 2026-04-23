@@ -34,10 +34,14 @@ const pulseManifest: Partial<ManifestOptions> = {
 };
 
 export default defineConfig({
+  build: {
+    outDir: "../public",
+    emptyOutDir: true,
+  },
   plugins: [
     react(),
     VitePWA({
-      registerType: "prompt",
+      registerType: "autoUpdate",
       injectRegister: null,
       strategies: "injectManifest",
       srcDir: "src",

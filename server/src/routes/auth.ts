@@ -2,7 +2,7 @@ import { Router, type RequestHandler } from "express";
 import { body } from "express-validator";
 import passport from "passport";
 
-import { env } from "../config/env";
+import { env, resolveClientUrl } from "../config/env";
 import {
   changePassword,
   completeGoogleAuth,
@@ -20,9 +20,9 @@ import { avatarUpload } from "../middleware/upload";
 import { validateRequest } from "../middleware/validateRequest";
 
 const router = Router();
-const ensureGoogleAuthEnabled: RequestHandler = (_req, res, next) => {
+const ensureGoogleAuthEnabled: RequestHandler = (req, res, next) => {
   if (!env.google.clientId || !env.google.clientSecret) {
-    res.redirect(`${env.clientUrl}/auth?error=server_error`);
+    res.redirect(resolveClientUrl("/auth?error=google_unavailable", req));
     return;
   }
 
@@ -45,14 +45,14 @@ router.get(
   ensureGoogleAuthEnabled,
   passport.authenticate("google", {
     session: false,
-    failureRedirect: `${env.clientUrl}/auth?error=google_failed`,
+    failureRedirect: "/api/auth/google/failure",
   }),
   completeGoogleAuth,
 );
 
 // GET /api/auth/google/failure - Redirect failed Google OAuth attempts back to the auth page.
-router.get("/google/failure", (_req, res) => {
-  res.redirect(`${env.clientUrl}/auth?error=google_failed`);
+router.get("/google/failure", (req, res) => {
+  res.redirect(resolveClientUrl("/auth?error=google_failed", req));
 });
 
 // POST /api/auth/register - Create an account and issue access/refresh cookies.

@@ -162,13 +162,11 @@ export const ChannelsPage = () => {
   return (
     <>
       <div className="grid gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
-        <section className="glass-panel rounded-[20px] p-4">
+        <section className="ig-panel">
           <div className="flex items-end justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-accent/80">
-                Channels
-              </p>
-              <h2 className="mt-2 font-heading text-2xl font-semibold">
+              <p className="ig-section-label">Channels</p>
+              <h2 className="ig-section-title mt-3 text-[2rem]">
                 Broadcast like Telegram, react like Instagram
               </h2>
             </div>
@@ -186,21 +184,14 @@ export const ChannelsPage = () => {
             </div>
           </div>
 
-          <input
-            className="mt-5 h-12 w-full rounded-[1.4rem] border border-white/10 bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
-            placeholder="Search channels"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
+          <input className="ig-field mt-5" placeholder="Search channels" value={search} onChange={(event) => setSearch(event.target.value)} />
 
           <div className="mt-5 space-y-3">
             {[...channels, ...discovered.filter((channel) => !channels.some((item) => item.id === channel.id))].map(
               (channel) => (
                 <button
                   key={channel.id}
-                  className={`glass-panel flex w-full items-center justify-between gap-3 rounded-[1.5rem] px-4 py-3 text-left transition ${
-                    channelId === channel.id ? "border-accent/30 bg-accent-soft/60" : "hover:bg-white/8"
-                  }`}
+                  className={`ig-list-row w-full text-left ${channelId === channel.id ? "ring-1 ring-[var(--unread)]" : ""}`}
                   onClick={() => navigate(`/channels/${channel.id}`)}
                   type="button"
                 >
@@ -208,14 +199,14 @@ export const ChannelsPage = () => {
                     <Avatar src={channel.avatarUrl} alt={channel.name} />
                     <div className="min-w-0">
                       <p className="truncate font-semibold">{channel.name}</p>
-                      <p className="truncate text-sm text-[var(--muted)]">
+                      <p className="truncate text-sm text-[var(--text-secondary)]">
                         {channel.description || "Tap to open the channel feed"}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right text-xs text-[var(--muted)]">
+                  <div className="text-right text-xs text-[var(--text-secondary)]">
                     <p>{channel.subscriberCount} subs</p>
-                    <p className="mt-1 uppercase tracking-[0.2em] text-accent/80">
+                    <p className="mt-1 uppercase tracking-[0.2em] text-[var(--pulse-accent2)]">
                       {channel.visibility}
                     </p>
                   </div>
@@ -225,7 +216,7 @@ export const ChannelsPage = () => {
           </div>
         </section>
 
-        <section className="glass-panel min-h-[70vh] rounded-[20px] p-4 md:p-5">
+        <section className="ig-panel min-h-[70vh]">
           {selectedChannel ? (
             isMember ? (
               <ChatWindow
@@ -233,10 +224,10 @@ export const ChannelsPage = () => {
                 roomName={selectedChannel.name}
                 currentUser={user}
                 messages={messages}
-                typingUsers={[]}
                 isChannel
                 muted={selectedChannel.mutedBy.includes(user.id)}
                 avatarUrl={selectedChannel.avatarUrl}
+                onBack={() => navigate("/channels")}
                 composerPlaceholder={
                   canPublish
                     ? "Publish a new update or reply to a post..."
@@ -320,7 +311,7 @@ export const ChannelsPage = () => {
                 onOpenMedia={handleOpenMedia}
               />
             ) : (
-              <div className="grid h-full place-items-center rounded-[1.7rem] border border-white/10 bg-white/4 p-6">
+              <div className="ig-empty-state h-full">
                 <div className="max-w-md text-center">
                   <div className="flex justify-center">
                     <Avatar
@@ -329,13 +320,13 @@ export const ChannelsPage = () => {
                       size="xl"
                     />
                   </div>
-                  <p className="mt-5 font-heading text-3xl font-semibold">
+                  <p className="ig-wordmark mt-5 text-3xl">
                     {selectedChannel.name}
                   </p>
-                  <p className="mt-2 text-sm text-[var(--muted)]">
+                  <p className="mt-2 text-sm text-[var(--text-secondary)]">
                     {selectedChannel.description || "Join this channel to read posts and leave reactions or comments."}
                   </p>
-                  <div className="mt-5 flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] text-accent/80">
+                  <div className="mt-5 flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] text-[var(--pulse-accent2)]">
                     <span>{selectedChannel.subscriberCount} subscribers</span>
                     <span>{selectedChannel.visibility}</span>
                   </div>
@@ -371,10 +362,10 @@ export const ChannelsPage = () => {
               </div>
             )
           ) : (
-            <div className="grid h-full place-items-center rounded-[1.7rem] border border-dashed border-white/10 bg-white/4">
+            <div className="ig-empty-state h-full">
               <div className="max-w-sm text-center">
-                <p className="font-heading text-2xl font-semibold">Choose a channel</p>
-                <p className="mt-2 text-sm text-[var(--muted)]">
+                <p className="ig-wordmark text-2xl">Choose a channel</p>
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">
                   Public channels show up on the left. Open one to browse posts, join it, or create your own broadcast space.
                 </p>
               </div>
@@ -386,7 +377,7 @@ export const ChannelsPage = () => {
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Create a channel">
         <div className="space-y-4">
           <input
-            className="h-12 w-full rounded-[1.3rem] border border-white/10 bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+            className="ig-field"
             placeholder="Channel name"
             value={channelForm.name}
             onChange={(event) =>
@@ -397,7 +388,7 @@ export const ChannelsPage = () => {
             }
           />
           <textarea
-            className="min-h-24 w-full rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-3 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+            className="ig-textarea"
             placeholder="Description"
             value={channelForm.description}
             onChange={(event) =>
@@ -407,15 +398,11 @@ export const ChannelsPage = () => {
               }))
             }
           />
-          <div className="grid grid-cols-2 gap-2 rounded-[1.3rem] bg-white/6 p-1">
+          <div className="ig-segmented" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
             {(["public", "private"] as const).map((visibility) => (
               <button
                 key={visibility}
-                className={`h-11 rounded-[1rem] text-sm font-semibold transition ${
-                  channelForm.visibility === visibility
-                    ? "bg-accent text-slate-950"
-                    : "text-[var(--muted)] hover:bg-white/6"
-                }`}
+                className={`ig-segmented__option ${channelForm.visibility === visibility ? "ig-segmented__option--active" : ""}`}
                 onClick={() =>
                   setChannelForm((current) => ({
                     ...current,
@@ -424,7 +411,10 @@ export const ChannelsPage = () => {
                 }
                 type="button"
               >
-                {visibility}
+                {channelForm.visibility === visibility ? (
+                  <span className="ig-segmented__indicator" style={{ width: "calc(50% - 4px)", transform: `translateX(${visibility === "private" ? 100 : 0}%)` }} />
+                ) : null}
+                <span className="relative z-10">{visibility}</span>
               </button>
             ))}
           </div>
@@ -460,7 +450,7 @@ export const ChannelsPage = () => {
       <Modal open={inviteOpen} onClose={() => setInviteOpen(false)} title="Join private channel">
         <div className="space-y-4">
           <input
-            className="h-12 w-full rounded-[1.3rem] border border-white/10 bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+            className="ig-field"
             placeholder="Paste invite code"
             value={joinInviteCode}
             onChange={(event) => setJoinInviteCode(event.target.value)}
@@ -497,7 +487,7 @@ export const ChannelsPage = () => {
         {selectedChannel ? (
           <div className="space-y-5">
             <input
-              className="h-12 w-full rounded-[1.3rem] border border-white/10 bg-white/5 px-4 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+              className="ig-field"
               placeholder="Channel name"
               value={editForm.name}
               onChange={(event) =>
@@ -508,7 +498,7 @@ export const ChannelsPage = () => {
               }
             />
             <textarea
-              className="min-h-24 w-full rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-3 outline-none placeholder:text-[var(--muted)] focus:border-accent/40"
+              className="ig-textarea"
               placeholder="Description"
               value={editForm.description}
               onChange={(event) =>
@@ -518,15 +508,11 @@ export const ChannelsPage = () => {
                 }))
               }
             />
-            <div className="grid grid-cols-2 gap-2 rounded-[1.3rem] bg-white/6 p-1">
+            <div className="ig-segmented" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
               {(["public", "private"] as const).map((visibility) => (
                 <button
                   key={visibility}
-                  className={`h-11 rounded-[1rem] text-sm font-semibold transition ${
-                    editForm.visibility === visibility
-                      ? "bg-accent text-slate-950"
-                      : "text-[var(--muted)] hover:bg-white/6"
-                  }`}
+                  className={`ig-segmented__option ${editForm.visibility === visibility ? "ig-segmented__option--active" : ""}`}
                   onClick={() =>
                     setEditForm((current) => ({
                       ...current,
@@ -535,7 +521,10 @@ export const ChannelsPage = () => {
                   }
                   type="button"
                 >
-                  {visibility}
+                  {editForm.visibility === visibility ? (
+                    <span className="ig-segmented__indicator" style={{ width: "calc(50% - 4px)", transform: `translateX(${visibility === "private" ? 100 : 0}%)` }} />
+                  ) : null}
+                  <span className="relative z-10">{visibility}</span>
                 </button>
               ))}
             </div>
@@ -560,11 +549,11 @@ export const ChannelsPage = () => {
               Save channel settings
             </Button>
 
-            <div className="rounded-[1.5rem] border border-white/10 bg-white/4 p-4">
+            <div className="ig-soft-card p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="font-semibold">Invite code</p>
-                  <p className="mt-1 text-sm text-[var(--muted)]">
+                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
                     Share this code to let people join your channel.
                   </p>
                 </div>
@@ -584,7 +573,7 @@ export const ChannelsPage = () => {
                   Copy
                 </Button>
               </div>
-              <div className="mt-3 rounded-[1.1rem] border border-white/10 bg-slate-950/40 px-4 py-3 text-sm tracking-[0.18em] text-[var(--muted)]">
+              <div className="mt-3 rounded-[1.1rem] border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3 text-sm tracking-[0.18em] text-[var(--text-secondary)]">
                 {selectedChannel.inviteCode ?? "Unavailable"}
               </div>
             </div>

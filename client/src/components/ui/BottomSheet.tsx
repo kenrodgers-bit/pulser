@@ -19,16 +19,19 @@ export const BottomSheet = ({
 }: BottomSheetProps) => (
   <AnimatePresence>
     {open ? (
-      <motion.div
-        className="fixed inset-0 z-50 bg-black/70 backdrop-blur-[8px]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.24, ease: APP_EASE }}
-        onClick={onClose}
-      >
+      <>
+        <motion.button
+          aria-label="Close sheet"
+          className="ig-sheet-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.24, ease: APP_EASE }}
+          onClick={onClose}
+          type="button"
+        />
         <motion.div
-          className="glass-elevated absolute inset-x-0 bottom-0 rounded-t-[20px] border border-border p-5 shadow-modal"
+          className="ig-sheet-card"
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
@@ -42,11 +45,11 @@ export const BottomSheet = ({
           }}
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="mx-auto mb-4 h-1 w-8 rounded-full bg-border" />
-          <h3 className="font-heading text-lg font-semibold">{title}</h3>
+          <div className="ig-sheet-handle" />
+          <h3 className="text-lg font-semibold">{title}</h3>
           <div className="mt-4">{children}</div>
         </motion.div>
-      </motion.div>
+      </>
     ) : null}
   </AnimatePresence>
 );

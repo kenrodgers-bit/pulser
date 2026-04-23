@@ -1,5 +1,6 @@
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+
+import { motion } from "framer-motion";
 
 import type { Chat, User } from "@/types";
 import { compactNumber, formatRelativeTime } from "@/utils/format";
@@ -14,22 +15,26 @@ type ChatListProps = {
 
 const resolvePreview = (chat: Chat) => {
   if (!chat.lastMessage) {
-    return "Open this conversation";
+    return "Start chatting";
   }
 
-  if (chat.lastMessage.type === "image" || chat.lastMessage.type === "video") {
-    return "📷 Photo";
+  if (chat.lastMessage.type === "image") {
+    return "Photo";
+  }
+
+  if (chat.lastMessage.type === "video") {
+    return "Video";
   }
 
   if (chat.lastMessage.type === "audio") {
-    return "🎵 Audio";
+    return "Audio";
   }
 
   if (chat.lastMessage.type === "file") {
-    return "📎 File";
+    return "File";
   }
 
-  return chat.lastMessage.snippet || "Open this conversation";
+  return chat.lastMessage.snippet || "Start chatting";
 };
 
 const resolveTitle = (chat: Chat, currentUserId: string) => {
@@ -67,7 +72,8 @@ const resolveAvatar = (chat: Chat, currentUserId: string) => {
       typeof otherParticipant === "string"
         ? "Direct chat"
         : otherParticipant?.displayName || "Direct chat",
-    userId: typeof otherParticipant === "string" ? otherParticipant : otherParticipant?.id ?? "",
+    userId:
+      typeof otherParticipant === "string" ? otherParticipant : otherParticipant?.id ?? "",
   };
 };
 
@@ -79,57 +85,64 @@ export const ChatList = ({
 }: ChatListProps) => {
   if (chats.length === 0) {
     return (
-      <div className="glass-panel rounded-[14px] border border-dashed border-border px-5 py-8 text-center">
-        <div className="mx-auto mb-4 h-14 w-14 rounded-[18px] border border-border bg-white/4" />
-        <p className="font-heading text-xl font-semibold">No conversations yet</p>
-        <p className="mt-2 text-sm text-[var(--muted)]">
-          Search for friends and start chatting.
+      <div className="ig-empty-state">
+        <div className="ig-empty-art" />
+        <p className="text-[15px] text-[var(--text-secondary)]">No messages yet</p>
+        <p className="text-[12px] text-[var(--text-muted)]">
+          Search for friends to start chatting.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-      {chats.map((chat) => {
-      const avatar = resolveAvatar(chat, currentUser.id);
+    <div className="ig-chat-list">
+      {chats.map((chat, index) => {
+        const avatar = resolveAvatar(chat, currentUser.id);
 
-      return (
-        <motion.div key={chat.id} layout>
-          <Link
-            to={`/chat/${chat.id}`}
-            className={`glass-panel flex h-16 items-center gap-3 rounded-[14px] px-3 py-3 transition ${
-              activeChatId === chat.id ? "border-accent/30 bg-accent/10" : "hover:bg-white/8"
-            }`}
+        return (
+          <motion.div
+            key={chat.id}
+            layout
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.18, delay: Math.min(index * 0.025, 0.16) }}
+            whileTap={{ scale: 0.98 }}
           >
-            <Avatar
-              src={avatar.src}
-              alt={avatar.alt}
-              online={onlineUserIds.includes(avatar.userId)}
-            />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate font-semibold">
-                    {resolveTitle(chat, currentUser.id)}
-                  </p>
-                  <p className="truncate text-sm text-[var(--muted)]">
-                    {resolvePreview(chat)}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right text-xs text-[var(--muted)]">
-                  <p>{formatRelativeTime(chat.lastMessage?.createdAt ?? chat.updatedAt)}</p>
-                  {chat.isGroup ? (
-                    <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-accent/80">
-                      {compactNumber(chat.participants.length)}
+            <Link
+              to={`/chat/${chat.id}`}
+              className={`ig-chat-item ${activeChatId === chat.id ? "ig-chat-item--active" : ""}`}
+            >
+              <Avatar
+                src={avatar.src}
+                alt={avatar.alt}
+                online={onlineUserIds.includes(avatar.userId)}
+              />
+              <div className="ig-chat-item__body">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="ig-chat-item__name truncate">
+                      {resolveTitle(chat, currentUser.id)}
                     </p>
-                  ) : null}
+                    <p className="ig-chat-item__preview">
+                      {resolvePreview(chat)}
+                    </p>
+                  </div>
+                  <div className="ig-chat-item__meta">
+                    <p className="ig-chat-item__time">
+                      {formatRelativeTime(chat.lastMessage?.createdAt ?? chat.updatedAt)}
+                    </p>
+                    {chat.isGroup ? (
+                      <span className="ig-badge">
+                        {compactNumber(chat.participants.length)}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
-        </motion.div>
-      );
+            </Link>
+          </motion.div>
+        );
       })}
     </div>
   );
