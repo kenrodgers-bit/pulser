@@ -206,7 +206,7 @@ export const ChannelsPage = () => {
                   </div>
                   <div className="text-right text-xs text-[var(--text-secondary)]">
                     <p>{channel.subscriberCount} subs</p>
-                    <p className="mt-1 uppercase tracking-[0.2em] text-[var(--pulse-accent2)]">
+                    <p className="mt-1 uppercase tracking-[0.2em] text-[var(--brand-violet)]">
                       {channel.visibility}
                     </p>
                   </div>
@@ -326,7 +326,7 @@ export const ChannelsPage = () => {
                   <p className="mt-2 text-sm text-[var(--text-secondary)]">
                     {selectedChannel.description || "Join this channel to read posts and leave reactions or comments."}
                   </p>
-                  <div className="mt-5 flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] text-[var(--pulse-accent2)]">
+                  <div className="mt-5 flex items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] text-[var(--brand-violet)]">
                     <span>{selectedChannel.subscriberCount} subscribers</span>
                     <span>{selectedChannel.visibility}</span>
                   </div>

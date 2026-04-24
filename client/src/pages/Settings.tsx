@@ -109,8 +109,11 @@ export const SettingsPage = () => {
             </div>
             <div className="rounded-[14px] bg-[var(--bg-base)] p-3">
               <div
-                className="rounded-[12px] px-3 py-3 text-sm text-[var(--white)] shadow-glow"
-                style={{ background: "var(--grad-brand-2)" }}
+                className="rounded-[12px] px-3 py-3 text-sm text-[var(--white)]"
+                style={{
+                  background: "var(--grad-brand-2)",
+                  boxShadow: "var(--shadow-glow)",
+                }}
               >
                 Accent action
               </div>

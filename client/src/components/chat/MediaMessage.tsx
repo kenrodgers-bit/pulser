@@ -31,7 +31,7 @@ const ViewOnceCanvasPreview = ({ previewUrl }: { previewUrl?: string }) => {
     const computedStyles = getComputedStyle(document.documentElement);
     const elevatedSurface = computedStyles.getPropertyValue("--bg-elevated").trim();
     const accentSecondary =
-      computedStyles.getPropertyValue("--pulse-accent2").trim() || elevatedSurface;
+      computedStyles.getPropertyValue("--brand-violet").trim() || elevatedSurface;
     const baseSurface = computedStyles.getPropertyValue("--bg-base").trim();
 
     const drawFallback = () => {
@@ -55,7 +55,8 @@ const ViewOnceCanvasPreview = ({ previewUrl }: { previewUrl?: string }) => {
       context.filter = "blur(12px)";
       context.drawImage(image, -14, -14, canvas.width + 28, canvas.height + 28);
       context.filter = "none";
-      context.fillStyle = "rgba(0, 0, 0, 0.44)";
+      context.fillStyle =
+        computedStyles.getPropertyValue("--overlay-black-44").trim() || elevatedSurface;
       context.fillRect(0, 0, canvas.width, canvas.height);
     };
     image.onerror = drawFallback;
@@ -96,7 +97,7 @@ export const MediaMessage = ({ message, isOwn, onOpen }: MediaMessageProps) => {
           {message.metadata?.originalName ?? "Voice note"}
         </div>
         <div className="mt-3 flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--pulse-accent2)] text-[var(--white)]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--brand-violet)] text-[var(--white)]">
             <PlayCircle className="h-4 w-4" />
           </div>
           <div className="flex flex-1 items-end gap-1">
@@ -107,7 +108,7 @@ export const MediaMessage = ({ message, isOwn, onOpen }: MediaMessageProps) => {
                 style={{
                   width: 4,
                   height: 10 + ((index * 7) % 20),
-                  background: index < 8 ? "var(--pulse-accent2)" : "var(--border)",
+                  background: index < 8 ? "var(--brand-violet)" : "var(--border)",
                 }}
               />
             ))}
@@ -194,7 +195,7 @@ export const MediaMessage = ({ message, isOwn, onOpen }: MediaMessageProps) => {
       {message.viewMode === "once" && !isOwn ? (
         <div className="ig-media-card__overlay">
           <div className="flex justify-end">
-            <span className="rounded-full bg-black/30 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--white)]">
+            <span className="ig-view-once-chip">
               View Once
             </span>
           </div>
@@ -203,7 +204,7 @@ export const MediaMessage = ({ message, isOwn, onOpen }: MediaMessageProps) => {
               <Lock className="h-3.5 w-3.5" />
               {message.metadata?.wasOpened ? "Opened" : "Tap to reveal"}
             </div>
-            <div className="rounded-full bg-white/14 px-3 py-1 text-xs text-[var(--white)]">
+            <div className="ig-view-once-eye">
               <Eye className="inline h-3.5 w-3.5" />
             </div>
           </div>

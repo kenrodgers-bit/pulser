@@ -24,8 +24,30 @@
   --online: #3fcf8e;
   --unread: #dd2a7b;
   --danger: #e74c3c;
+  --danger-soft: rgba(231, 76, 60, 0.24);
+  --brand-violet: #8134af;
   --white: #ffffff;
   --black: #000000;
+  --google-blue: #4285f4;
+  --google-green: #34a853;
+  --google-yellow: #fbbc05;
+  --google-red: #ea4335;
+
+  --overlay-black-12: rgba(0, 0, 0, 0.12);
+  --overlay-black-20: rgba(0, 0, 0, 0.2);
+  --overlay-black-30: rgba(0, 0, 0, 0.3);
+  --overlay-black-44: rgba(0, 0, 0, 0.44);
+  --overlay-black-70: rgba(0, 0, 0, 0.7);
+  --overlay-black-95: rgba(0, 0, 0, 0.95);
+  --overlay-white-10: rgba(255, 255, 255, 0.1);
+  --overlay-white-14: rgba(255, 255, 255, 0.14);
+  --overlay-white-20: rgba(255, 255, 255, 0.2);
+  --overlay-white-50: rgba(255, 255, 255, 0.5);
+  --overlay-white-70: rgba(255, 255, 255, 0.7);
+  --overlay-white-80: rgba(255, 255, 255, 0.8);
+  --story-viewer-bg:
+    radial-gradient(circle at top, rgba(129, 52, 175, 0.35), transparent 30%),
+    var(--black);
 
   --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.45);
   --shadow-toast: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -1083,8 +1105,36 @@ select:focus-visible {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.7));
+  background: linear-gradient(
+    180deg,
+    var(--overlay-black-12),
+    var(--overlay-black-70)
+  );
   padding: 14px;
+}
+
+.ig-view-once-chip,
+.ig-view-once-eye {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  color: var(--white);
+}
+
+.ig-view-once-chip {
+  background: var(--overlay-black-30);
+  padding: 4px 12px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.ig-view-once-eye {
+  background: var(--overlay-white-14);
+  padding: 4px 12px;
+  font-size: 12px;
 }
 
 .ig-viewer {
@@ -1093,7 +1143,7 @@ select:focus-visible {
   z-index: 80;
   display: flex;
   flex-direction: column;
-  background: rgba(0, 0, 0, 0.95);
+  background: var(--overlay-black-95);
   padding: 16px;
 }
 
@@ -1139,6 +1189,31 @@ select:focus-visible {
   height: 0.5px;
   background: var(--border);
   content: "";
+}
+
+.ig-google-button {
+  display: flex;
+  height: 44px;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 0.5px solid var(--white);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--black);
+  font-size: 13px;
+  font-weight: 600;
+  transition: transform 150ms ease, opacity 150ms ease;
+}
+
+.ig-google-button:hover {
+  transform: scale(1.01);
+}
+
+.ig-google-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .ig-grid-2,
@@ -1202,6 +1277,33 @@ select:focus-visible {
 
 .shadow-glow {
   box-shadow: var(--shadow-glow) !important;
+}
+
+.ig-story-reaction {
+  border: 0.5px solid var(--overlay-white-10);
+  border-radius: 999px;
+  background: var(--overlay-white-10);
+  padding: 8px 12px;
+  color: var(--white);
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.ig-story-reaction:hover {
+  background: var(--overlay-white-14);
+}
+
+.ig-story-input {
+  height: 48px;
+  flex: 1;
+  border: 0.5px solid var(--overlay-white-10);
+  border-radius: 999px;
+  background: var(--overlay-black-30);
+  padding: 0 16px;
+  color: var(--white);
+}
+
+.ig-story-input::placeholder {
+  color: var(--overlay-white-50);
 }
 
 @media (min-width: 768px) {

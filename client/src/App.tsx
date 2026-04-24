@@ -88,8 +88,10 @@ const AppInner = () => {
     if (theme === "system") {
       const isLight = window.matchMedia("(prefers-color-scheme: light)").matches;
       root.classList.toggle("light", isLight);
+      root.classList.toggle("dark", !isLight);
     } else {
       root.classList.toggle("light", theme === "light");
+      root.classList.toggle("dark", theme !== "light");
     }
   }, [theme]);
 

@@ -105,10 +105,7 @@ export const StoryViewer = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          style={{
-            background:
-              "radial-gradient(circle at top, color-mix(in srgb, var(--pulse-accent2) 45%, transparent), transparent 30%), var(--black)",
-          }}
+          style={{ background: "var(--story-viewer-bg)" }}
           onClick={onClose}
         >
           <motion.div
@@ -124,11 +121,16 @@ export const StoryViewer = ({
           >
             <div className="mb-4 flex gap-1">
               {group.stories.map((item, itemIndex) => (
-                <div key={item.id} className="h-1 flex-1 overflow-hidden rounded-full bg-white/20">
+                <div
+                  key={item.id}
+                  className="h-1 flex-1 overflow-hidden rounded-full"
+                  style={{ background: "var(--overlay-white-20)" }}
+                >
                   <motion.div
-                    className="h-full bg-white"
+                    className="h-full"
                     animate={{ width: itemIndex <= index ? "100%" : "0%" }}
                     transition={{ duration: 0.25 }}
+                    style={{ background: "var(--white)" }}
                   />
                 </div>
               ))}
@@ -143,7 +145,12 @@ export const StoryViewer = ({
                   <p className="truncate text-sm font-semibold text-[var(--white)]">
                     {group.user.displayName}
                   </p>
-                  <p className="truncate text-xs text-white/70">@{group.user.username}</p>
+                  <p
+                    className="truncate text-xs"
+                    style={{ color: "var(--overlay-white-70)" }}
+                  >
+                    @{group.user.username}
+                  </p>
                 </div>
               </div>
               <button
@@ -160,11 +167,15 @@ export const StoryViewer = ({
               <AnimatePresence mode="wait">
                 <motion.div
                   key={story.id}
-                  className="relative w-full overflow-hidden rounded-[20px] border border-white/10 bg-black/20"
+                  className="relative w-full overflow-hidden rounded-[20px] border"
                   initial={{ scale: 0.92, opacity: 0.35 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.92, opacity: 0.2 }}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  style={{
+                    borderColor: "var(--overlay-white-10)",
+                    background: "var(--overlay-black-20)",
+                  }}
                 >
                   {story.mediaType === "video" ? (
                     <video
@@ -193,13 +204,17 @@ export const StoryViewer = ({
             </div>
 
             <div className="mt-5 space-y-4">
-              {story.caption ? <p className="text-sm text-white/80">{story.caption}</p> : null}
+              {story.caption ? (
+                <p className="text-sm" style={{ color: "var(--overlay-white-80)" }}>
+                  {story.caption}
+                </p>
+              ) : null}
 
               <div className="flex flex-wrap gap-2" onPointerDown={stopViewerDrag}>
                 {reactionChoices.map((emoji) => (
                   <motion.button
                     key={emoji}
-                    className="rounded-full bg-white/10 px-3 py-2 text-lg text-[var(--white)] transition hover:bg-white/14"
+                    className="ig-story-reaction text-lg"
                     onClick={() => handleReaction(emoji)}
                     type="button"
                     whileTap={{ scale: 0.92 }}
@@ -211,7 +226,7 @@ export const StoryViewer = ({
 
               <div className="flex gap-3" onPointerDown={stopViewerDrag}>
                 <input
-                  className="h-12 flex-1 rounded-full border border-white/10 bg-black/30 px-4 text-sm text-[var(--white)] outline-none placeholder:text-white/50"
+                  className="ig-story-input text-sm"
                   placeholder="Reply to story..."
                   value={reply}
                   onChange={(event) => setReply(event.target.value)}
@@ -228,7 +243,7 @@ export const StoryViewer = ({
               </div>
 
               <div className="flex items-center justify-between" onPointerDown={stopViewerDrag}>
-                <p className="text-sm text-white/70">
+                <p className="text-sm" style={{ color: "var(--overlay-white-70)" }}>
                   <Eye className="mr-1 inline h-4 w-4" />
                   {story.viewers.length}
                 </p>
